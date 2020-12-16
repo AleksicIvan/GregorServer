@@ -1,5 +1,7 @@
 package aleksic.Servis;
 
-public enum Faza {
+import java.io.Serializable;
+
+public enum Faza implements Serializable {
     IZBACI_ZLATNIK, PLATI, ODIGRAJ_VITEZA, NAPAD, ODBRANA;
 }

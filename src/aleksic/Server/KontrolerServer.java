@@ -3,15 +3,19 @@ package aleksic.Server;
 import aleksic.Servis.Igra;
 import aleksic.TransferObjekat.TransferObjekatIgrac;
 
+import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 public class KontrolerServer {
     static ServerSocket ss;
     static Klijent kl;
+    static List<Klijent> lkl = new ArrayList<>();
 
     public static void main(String[] args) throws Exception {
         ss = new ServerSocket(9000);
@@ -21,6 +25,7 @@ public class KontrolerServer {
             // programski kod!!!
             Socket soketS = ss.accept();
             kl = new Klijent(soketS, ++iKlijent);
+            lkl.add(kl);
         }
     }
 }
@@ -42,7 +47,7 @@ class Klijent extends Thread {
         l = new Lista();
         // programski kod!!!
         d = new Datoteka(l);
-//        igra = new Igra(new Date());
+        igra = Igra.getInstance();
 //        komunikacijaSaKlijentom();
         start();
     }
@@ -58,18 +63,11 @@ class Klijent extends Thread {
                 out = new ObjectOutputStream(soketS.getOutputStream());
                 in = new ObjectInputStream(soketS.getInputStream());
                 toi = (TransferObjekatIgrac) in.readObject();
-                System.out.println("Klijent " + this + " povezan");
+                System.out.println("Klijent " + iKlijent + " povezan");
                 if (toi.nazivOperacije.equals("init")) {
                     System.out.println("Sistemska operacija je init");
-
-                    if (toi.igra == null) {
-                        igra = new Igra(new Date());
-                        toi.igra = igra;
-                        System.out.println("Igra je kreirana i dodata do toi");
-                    } else {
-                        System.out.println("Igra vec postoji i dodata je do toi");
-                        toi.igra = igra;
-                    }
+                    toi.igra = igra;
+                    System.out.println("Igra je dodata do toi");
                 }
 
                 if (toi.nazivOperacije.equals("kreirajIgraca")) {
@@ -79,6 +77,7 @@ class Klijent extends Thread {
                     if (igra.getIgraci().size() < 2) {
                         igra.dodajIgraca(toi.igr);
                         toi.igra = igra;
+                        obavestiProtivnika(toi);
                     }
                 }
 //                    if (toi.nazivOperacije.equals("napuniDatotekuIzListe")) {
@@ -93,42 +92,20 @@ class Klijent extends Thread {
         }
     }
 
-    public void komunikacijaSaKlijentom() {
-        try {
-            String signal = "";
-
-            TransferObjekatIgrac toi;
-
-            while (true) {
-                out = new ObjectOutputStream(soketS.getOutputStream());
-                in = new ObjectInputStream(soketS.getInputStream());
-                toi = (TransferObjekatIgrac) in.readObject();
-                System.out.println("Klijent " + this + " povezan");
-                if (toi.nazivOperacije.equals("init")) {
-                    if (toi.igra == null) {
-                        igra = new Igra(new Date());
-                        toi.igra = igra;
-                    } else {
-                        toi.igra = igra;
-                    }
+    private void obavestiProtivnika(TransferObjekatIgrac toi) throws IOException {
+        for (Klijent k : KontrolerServer.lkl) {
+            System.out.println("iKlijent je " + iKlijent);
+            System.out.println("k.iKlijent je " + k.iKlijent);
+            if (k.iKlijent != iKlijent) {
+                try {
+                    System.out.println("Obavestavam klijenta " + k.iKlijent);
+                    toi.poruka = "Sistem je pronasao protivnika.";
+                    k.out.writeObject(toi);
+                    break;
+                } catch (IOException ex) {
+                    ex.printStackTrace();
                 }
-
-                if (toi.nazivOperacije.equals("kreirajIgraca")) {
-                    l.kreirajIgraca(toi);
-                    if (igra.getIgraci().size() < 2) {
-                        igra.dodajIgraca(toi.igr);
-                        toi.igra = igra;
-                    }
-                }
-//                    if (toi.nazivOperacije.equals("napuniDatotekuIzListe")) {
-//                        d.napuniDatotekuIzListe(tok);
-//                    }
-                // programski kod!!!
-                out.writeObject(toi);
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.out.println(e);
         }
     }
 }

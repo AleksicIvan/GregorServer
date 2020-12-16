@@ -13,6 +13,7 @@ import java.util.Scanner;
 import java.util.function.Predicate;
 
 public class Igra implements Serializable {
+    private static Igra instance;
     private List<Igrac> igraci = new ArrayList<>();
     private Date datumIgre;
     private Igrac igracNaPotezu;
@@ -21,6 +22,13 @@ public class Igra implements Serializable {
 
     public Igra(Date datumIgre) {
         this.datumIgre = datumIgre;
+    }
+
+    public static Igra getInstance() {
+        if (instance == null) {
+            instance = new Igra(new Date());
+        }
+        return instance;
     }
 
     public Igra(List<Igrac> igraci, Date datumIgre) {
@@ -34,7 +42,11 @@ public class Igra implements Serializable {
     }
 
     public void dodajIgraca (Igrac igrac) {
+
         igraci.add(igrac);
+        if (igraci.size() == 2) {
+            init(igraci);
+        }
     }
 
     public void init(List<Igrac> igraci) {

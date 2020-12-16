@@ -1,6 +1,8 @@
 package aleksic.Servis;
 
-public class FazePoteza {
+import java.io.Serializable;
+
+public class FazePoteza implements Serializable {
     Faza faza = null;
 
     public FazePoteza(Faza faza) {
