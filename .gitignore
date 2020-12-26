@@ -1,6 +1,11 @@
 # Compiled class file
 *.class
 
+.DS_Store
+.idea/vcs.xml
+out/.DS_Store
+src/.DS_Store
+
 # Log file
 *.log
 

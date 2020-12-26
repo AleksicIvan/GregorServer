@@ -9,6 +9,8 @@ public class Karta implements Serializable {
     Integer cena = null;
     TipKarte tip = null;
     boolean iskoriscena = false;
+    boolean pokaziKartu = true;
+    boolean isDisabled = true;
 
     public Karta(Integer id) {
         this.id = id;
@@ -25,6 +27,23 @@ public class Karta implements Serializable {
         this.tip = tip;
         this.iskoriscena = iskoriscena;
     }
+
+    public boolean isPokaziKartu() {
+        return pokaziKartu;
+    }
+
+    public void setPokaziKartu(boolean value) {
+        this.pokaziKartu = value;
+    }
+
+    public boolean getIsDisabled() {
+        return isDisabled;
+    }
+
+    public void setIsDisabled(boolean disabled) {
+        isDisabled = disabled;
+    }
+
 
     public Karta(TipKarte tip) {
         this.tip = tip;
@@ -83,6 +102,8 @@ public class Karta implements Serializable {
                 ", cena=" + cena +
                 ", tip=" + tip +
                 ", da li je iskoriscena " + iskoriscena +
+                ", da li je treba pokazati " + pokaziKartu +
+                ", da li je disabled " + isDisabled +
                 '}';
     }
 }

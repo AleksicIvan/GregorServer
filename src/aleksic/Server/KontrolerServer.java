@@ -57,7 +57,8 @@ class Klijent extends Thread {
         try {
             String signal = "";
 
-            TransferObjekatIgrac toi;
+            TransferObjekatIgrac toi = null;
+
 
             while (true) {
                 out = new ObjectOutputStream(soketS.getOutputStream());
