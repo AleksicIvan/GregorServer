@@ -1,7 +1,5 @@
 package aleksic.Models;
 
-import aleksic.Servis.FazePoteza;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,7 +12,6 @@ public class Igrac implements Serializable {
     private List<Karta> spil = new ArrayList<>();
     private List<Karta> ruka = new ArrayList<>();
     private Talon talon = new Talon(new ArrayList<>(), new ArrayList<>(), new ArrayList<>(),  new ArrayList<>(), new ArrayList<>());
-    private FazePoteza fazaPoteza;
     private int zivot = 20;
 
     public Igrac(Integer id, String korisnickoIme) {

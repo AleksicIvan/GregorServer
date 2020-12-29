@@ -1,5 +1,6 @@
 package aleksic.Server;
 
+import aleksic.Servis.Faza;
 import aleksic.Servis.Igra;
 import aleksic.TransferObjekat.TransferObjekatIgrac;
 
@@ -80,6 +81,21 @@ class Klijent extends Thread {
                         toi.igra = igra;
                         obavestiProtivnika(toi);
                     }
+                }
+
+                if (toi.nazivOperacije.equals("odigrajZlatnika")) {
+                    Igra.getInstance().getIgracNaPotezu().postaviRuku(toi.igra.getIgracNaPotezu().vratiRuku());
+                    Igra.getInstance().getIgracNaPotezu().vratiTalon().setRedZlatnika(toi.igra.getIgracNaPotezu().vratiTalon().getRedZlatnika());
+                    Igra.getInstance().postaviFazuPoteza(Faza.ODIGRAJ_VITEZA);
+//                    obavestiProtivnika(toi);
+                }
+
+                if (toi.nazivOperacije.equals("odigrajViteza")) {
+
+                }
+
+                if (toi.nazivOperacije.equals("napadniVitezom")) {
+
                 }
 //                    if (toi.nazivOperacije.equals("napuniDatotekuIzListe")) {
 //                        d.napuniDatotekuIzListe(tok);
