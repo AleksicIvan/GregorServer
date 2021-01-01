@@ -21,7 +21,7 @@ public class Igra implements Serializable {
         this.datumIgre = datumIgre;
     }
 
-    public static Igra getInstance() {
+    public static synchronized Igra getInstance() {
         if (instance == null) {
             instance = new Igra(new Date());
         }
@@ -31,7 +31,7 @@ public class Igra implements Serializable {
     public Igra(List<Igrac> igraci, Date datumIgre) {
         this.igraci = igraci;
         this.datumIgre = datumIgre;
-        init(igraci);
+        init();
     }
 
     public List<Igrac> getIgraci() {
@@ -41,12 +41,12 @@ public class Igra implements Serializable {
     public void dodajIgraca (Igrac igrac) {
 
         igraci.add(igrac);
-        if (igraci.size() == 2) {
-            init(igraci);
-        }
+//        if (igraci.size() == 2) {
+//            init(igraci);
+//        }
     }
 
-    public void init(List<Igrac> igraci) {
+    public void init() {
         for (Integer i = 0; i < igraci.size(); i++) {
             Igrac trenutniIgrac = igraci.get(i);
             trenutniIgrac.setZivot(20);
