@@ -62,9 +62,27 @@ class Klijent extends Thread {
 
             while (true) {
                 toi = (TransferObjekatIgrac) in.readObject();
+
+                System.out.println("toi.indeks " + toi.indeks);
+
+                if (toi.rukaPrvogIgraca != null) {
+                    System.out.println("ruka prvog igraca posle citanja: " + toi.rukaPrvogIgraca.size());
+                }
+
+                if (toi.rukaDrugogIgraca != null) {
+                    System.out.println("ruka drugog igraca posle citanja: " + toi.rukaDrugogIgraca.size());
+                }
+
+
+
+
+                System.out.println("procitao sam toi, majketiga");
                 if (toi.nazivOperacije.equals("init")) {
                     System.out.println("Sistemska operacija je init");
                     toi.igra = Igra.getInstance();
+                    if (toi.igra.getIgraci().size() == 1) {
+                        toi.prviIgrac = Igra.getInstance().getIgraci().get(0);
+                    }
                     toi.brojigraca = toi.igra.getIgraci().size() == 1 ? 1 : 0;
                     System.out.println("Igra je dodata do toi");
                     out.writeObject(toi);
@@ -85,13 +103,12 @@ class Klijent extends Thread {
 
                     if (Igra.getInstance().getIgraci().size() == 1) {
                         System.out.println("Sistemska operacija je kreirajIgraca - ima jedan igrac");
-
-//                        igra.dodajIgraca(toi.igr);
                         toi.igra = Igra.getInstance();
                         toi.prviIgrac = Igra.getInstance().getIgraci().get(0);
                         toi.brojigraca = 1;
+                        toi.poruka = "Prvi igrac je registrovan. Sistem ceka drugog igraca!!!";
                         out.writeObject(toi);
-                        obavestiProtivnika(toi);
+                        obavestiProtivnika(toi, "Prvi igrac je registrovan. Sistem ceka drugog igraca!!!");
                     }
 
                     if (Igra.getInstance().getIgraci().size() == 2) {
@@ -113,17 +130,20 @@ class Klijent extends Thread {
                         toi.fazaPoteza = Igra.getInstance().vratiFazuPoteza();
                         toi.poruka = "Sistem je pronasao protivnika.Obavestavam zadnjeg ulogovanog!";
                         out.writeObject(toi);
-                        obavestiProtivnika(toi);
+                        obavestiProtivnika(toi, "Sistem je pronasao protivnika.Obavestavam zadnjeg ulogovanog!");
                     }
 
                 }
 
-//                if (toi.nazivOperacije.equals("odigrajZlatnika")) {
-//                    Igra.getInstance().getIgracNaPotezu().postaviRuku(toi.igra.getIgracNaPotezu().vratiRuku());
-//                    Igra.getInstance().getIgracNaPotezu().vratiTalon().setRedZlatnika(toi.igra.getIgracNaPotezu().vratiTalon().getRedZlatnika());
-//                    Igra.getInstance().postaviFazuPoteza(Faza.ODIGRAJ_VITEZA);
-////                    obavestiProtivnika(toi);
-//                }
+                if (toi.nazivOperacije.equals("odigrajZlatnik")) {
+                    System.out.println("Sistemska operacija je odigrajZlatnik.");
+                    obavestiProtivnika(toi, "Protivnik je odigrao zlatnik kartu.Obavestavam zadnjeg ulogovanog!");
+                }
+
+                if (toi.nazivOperacije.equals("plati")) {
+                    System.out.println("Sistemska operacija je plati.");
+                    obavestiProtivnika(toi, "Protivnik je platio zlatnik kartom.Obavestavam zadnjeg ulogovanog!");
+                }
 //
 //                if (toi.nazivOperacije.equals("odigrajViteza")) {
 //
@@ -145,18 +165,27 @@ class Klijent extends Thread {
         }
     }
 
-    private void obavestiProtivnika(TransferObjekatIgrac toi) throws IOException {
+    private void obavestiProtivnika(TransferObjekatIgrac toi, String poruka) throws IOException {
         for (Klijent k : KontrolerServer.lkl) {
             System.out.println("iKlijent je " + iKlijent);
             System.out.println("k.iKlijent je " + k.iKlijent);
             if (k.iKlijent != iKlijent) {
                 try {
                     System.out.println("Obavestavam klijenta " + k.iKlijent);
-                    toi.poruka = "Sistem je pronasao protivnika.";
+                    toi.poruka = poruka;
                     toi.igr = Igra.getInstance().getIgraci().get(0);
 //                    toi.drugiIgrac = Igra.getInstance().getIgraci().get(1);
 //                    toi.listaIgarca = Igra.getInstance().getIgraci();
+                    if (toi.rukaPrvogIgraca != null) {
+                        System.out.println("ruka prvog igraca iz obavesti: " + toi.rukaPrvogIgraca.size());
+                    }
+
+                    if (toi.rukaDrugogIgraca != null) {
+                        System.out.println("ruka drugog igraca iz obavesti: " + toi.rukaDrugogIgraca.size());
+                    }
+//                    k.out.reset();
                     k.out.writeObject(toi);
+                    System.out.println("posalo sam toi, majketiga");
 //                    break;
                 } catch (IOException ex) {
                     ex.printStackTrace();
