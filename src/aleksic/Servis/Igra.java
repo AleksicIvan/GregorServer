@@ -128,14 +128,14 @@ public class Igra implements Serializable {
             System.out.println("Karta iz ruke je: " + odigranaKarta.toString());
             if (odigranaKarta == null) {
                 System.out.println("Nemate Zlatnik u ruci. Prelazimo na sledecu fazu igre");
-                postaviFazuPoteza(Faza.ODIGRAJ_VITEZA);
+                postaviFazuPoteza(Faza.IZBACI_VITEZA);
                 return;
             }
             System.out.println("Odigraj Zlatnik? y/n");
             var odgovorIgraca = scanner.nextLine();
             if (odgovorIgraca == "n") {
                 System.out.println("Odabrali ste da ne odigrate Zlatnik. Prelazimo na sledecu fazu igre");
-                postaviFazuPoteza(Faza.ODIGRAJ_VITEZA);
+                postaviFazuPoteza(Faza.IZBACI_VITEZA);
                 return;
             }
             igracevaRuka.remove(odigranaKarta);
@@ -145,7 +145,7 @@ public class Igra implements Serializable {
             var noviTalon = igracNaPotezu.vratiTalon();
             System.out.println("Nakon poteza IZBACI_ZLATNIK novi Talon igraca je " + noviTalon);
             System.out.println("Nakon poteza IZBACI_ZLATNIK novi Ruka igraca je " + novaIgracevaRuka);
-            postaviFazuPoteza(Faza.ODIGRAJ_VITEZA);
+            postaviFazuPoteza(Faza.IZBACI_VITEZA);
             System.out.println("Faza poteza nakon IZBACI_ZLATNIK je: " + vratiFazuPoteza());
             if (igracNaPotezu.getZivot() == 0) {
                 setKrajIgre(true);
@@ -154,7 +154,7 @@ public class Igra implements Serializable {
             }
         }
 
-        if (vratiFazuPoteza().equals(Faza.ODIGRAJ_VITEZA)) {
+        if (vratiFazuPoteza().equals(Faza.IZBACI_VITEZA)) {
             var igracevaRuka = igracNaPotezu.vratiRuku();
             Predicate<Karta> poTipu = k -> k.vratiTipKarte().equals(TipKarte.VITEZ);
             // ponoviti dok god ima zlatnika u redu zlatnika i vitezova u ruci
@@ -181,10 +181,10 @@ public class Igra implements Serializable {
             var novaIgracevaRuka = igracNaPotezu.vratiRuku();
             igracevTalon.dodajURedVitezova(odigranaKarta);
             var noviTalon = igracNaPotezu.vratiTalon();
-            System.out.println("Nakon poteza ODIGRAJ_VITEZA novi Talon igraca je " + noviTalon);
-            System.out.println("Nakon poteza ODIGRAJ_VITEZA novi Ruka igraca je " + novaIgracevaRuka);
+            System.out.println("Nakon poteza IZBACI_VITEZA novi Talon igraca je " + noviTalon);
+            System.out.println("Nakon poteza IZBACI_VITEZA novi Ruka igraca je " + novaIgracevaRuka);
             postaviFazuPoteza(Faza.NAPAD);
-            System.out.println("Faza poteza nakon ODIGRAJ_VITEZA je: " + vratiFazuPoteza());
+            System.out.println("Faza poteza nakon IZBACI_VITEZA je: " + vratiFazuPoteza());
             if (igracNaPotezu.getZivot() == 0) {
                 setKrajIgre(true);
             } else {

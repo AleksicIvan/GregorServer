@@ -130,27 +130,34 @@ class Klijent extends Thread {
                         toi.fazaPoteza = Igra.getInstance().vratiFazuPoteza();
                         toi.poruka = "Sistem je pronasao protivnika.Obavestavam zadnjeg ulogovanog!";
                         out.writeObject(toi);
-                        obavestiProtivnika(toi, "Sistem je pronasao protivnika.Obavestavam zadnjeg ulogovanog!");
+                        obavestiProtivnika(toi, "Sistem je pronasao protivnika. Obavestavam zadnjeg ulogovanog!");
                     }
 
                 }
 
                 if (toi.nazivOperacije.equals("odigrajZlatnik")) {
                     System.out.println("Sistemska operacija je odigrajZlatnik.");
-                    obavestiProtivnika(toi, "Protivnik je odigrao zlatnik kartu.Obavestavam zadnjeg ulogovanog!");
+                    obavestiProtivnika(toi, "Protivnik je odigrao zlatnik kartu. Obavestavam drugogo igraca!");
                 }
 
                 if (toi.nazivOperacije.equals("plati")) {
                     System.out.println("Sistemska operacija je plati.");
-                    obavestiProtivnika(toi, "Protivnik je platio zlatnik kartom.Obavestavam zadnjeg ulogovanog!");
+                    obavestiProtivnika(toi, "Protivnik je platio zlatnik kartom. Obavestavam drugogo igraca!");
+                }
+
+                if (toi.nazivOperacije.equals("promenaFaze")) {
+                    System.out.println("Sistemska operacija je promena faze.");
+                    obavestiProtivnika(toi, "Faza igre je promenjena. Obavestavam drugogo igraca!");
                 }
 //
-//                if (toi.nazivOperacije.equals("odigrajViteza")) {
-//
-//                }
+                if (toi.nazivOperacije.equals("izbaciViteza")) {
+                    System.out.println("Sistemska operacija je izbaci Viteza.");
+                    obavestiProtivnika(toi, "Protivnik je izbacio viteza. Obavestavam drugogo igraca!");
+                }
 //
 //                if (toi.nazivOperacije.equals("napadniVitezom")) {
-//
+//                    System.out.println("Sistemska operacija je napadni vitezom.");
+//                    obavestiProtivnika(toi, "Protivnik je napao vitezom. Obavestavam drugogo igraca!");
 //                }
 //                    if (toi.nazivOperacije.equals("napuniDatotekuIzListe")) {
 //                        d.napuniDatotekuIzListe(tok);
@@ -174,18 +181,7 @@ class Klijent extends Thread {
                     System.out.println("Obavestavam klijenta " + k.iKlijent);
                     toi.poruka = poruka;
                     toi.igr = Igra.getInstance().getIgraci().get(0);
-//                    toi.drugiIgrac = Igra.getInstance().getIgraci().get(1);
-//                    toi.listaIgarca = Igra.getInstance().getIgraci();
-                    if (toi.rukaPrvogIgraca != null) {
-                        System.out.println("ruka prvog igraca iz obavesti: " + toi.rukaPrvogIgraca.size());
-                    }
-
-                    if (toi.rukaDrugogIgraca != null) {
-                        System.out.println("ruka drugog igraca iz obavesti: " + toi.rukaDrugogIgraca.size());
-                    }
-//                    k.out.reset();
                     k.out.writeObject(toi);
-                    System.out.println("posalo sam toi, majketiga");
 //                    break;
                 } catch (IOException ex) {
                     ex.printStackTrace();
