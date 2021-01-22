@@ -29,4 +29,5 @@ public class TransferObjekatIgrac implements Serializable {
     public Talon talonDrugogIgraca;
     public Igrac igracNaPotezu;
     public Faza fazaPoteza;
+    public boolean prviPotez;
 }

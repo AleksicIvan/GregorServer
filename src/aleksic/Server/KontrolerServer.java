@@ -20,7 +20,7 @@ public class KontrolerServer {
 
     public static void main(String[] args) throws Exception {
         System.out.println("Podignut je serverski program:");
-        ss = new ServerSocket(9000);
+        ss = new ServerSocket(9001);
         int iKlijent = 0;
         while (true) {
             // programski kod!!!
@@ -74,9 +74,6 @@ class Klijent extends Thread {
                 }
 
 
-
-
-                System.out.println("procitao sam toi, majketiga");
                 if (toi.nazivOperacije.equals("init")) {
                     System.out.println("Sistemska operacija je init");
                     toi.igra = Igra.getInstance();
@@ -128,6 +125,7 @@ class Klijent extends Thread {
                         toi.igracNaPotezu = Igra.getInstance().vratiIgracaNaPotezu();
                         toi.brojigraca = 2;
                         toi.fazaPoteza = Igra.getInstance().vratiFazuPoteza();
+                        toi.prviPotez = true;
                         toi.poruka = "Sistem je pronasao protivnika.Obavestavam zadnjeg ulogovanog!";
                         out.writeObject(toi);
                         obavestiProtivnika(toi, "Sistem je pronasao protivnika. Obavestavam zadnjeg ulogovanog!");
@@ -154,6 +152,17 @@ class Klijent extends Thread {
                     System.out.println("Sistemska operacija je izbaci Viteza.");
                     obavestiProtivnika(toi, "Protivnik je izbacio viteza. Obavestavam drugogo igraca!");
                 }
+
+                if (toi.nazivOperacije.equals("napad")) {
+                    System.out.println("Sistemska operacija je NAPAD.");
+                    obavestiProtivnika(toi, "Protivnik je napao vitezom. Obavestavam drugogo igraca!");
+                }
+
+                if (toi.nazivOperacije.equals("odbrana")) {
+                    System.out.println("Sistemska operacija je Obrana.");
+                    obavestiProtivnika(toi, "Protivnik se brani vitezom. Obavestavam drugogo igraca!");
+                }
+
 //
 //                if (toi.nazivOperacije.equals("napadniVitezom")) {
 //                    System.out.println("Sistemska operacija je napadni vitezom.");

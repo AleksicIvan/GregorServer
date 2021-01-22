@@ -1,6 +1,7 @@
 package aleksic.Models;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 public class Karta implements Serializable {
     Integer id = null;
@@ -91,6 +92,19 @@ public class Karta implements Serializable {
 
     public void setCena(Integer cena) {
         this.cena = cena;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Karta karta = (Karta) o;
+        return id.equals(karta.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 
     @Override
