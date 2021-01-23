@@ -63,26 +63,15 @@ class Klijent extends Thread {
             while (true) {
                 toi = (TransferObjekatIgrac) in.readObject();
 
-                System.out.println("toi.indeks " + toi.indeks);
-
-                if (toi.rukaPrvogIgraca != null) {
-                    System.out.println("ruka prvog igraca posle citanja: " + toi.rukaPrvogIgraca.size());
-                }
-
-                if (toi.rukaDrugogIgraca != null) {
-                    System.out.println("ruka drugog igraca posle citanja: " + toi.rukaDrugogIgraca.size());
-                }
-
-
                 if (toi.nazivOperacije.equals("init")) {
                     System.out.println("Sistemska operacija je init");
                     toi.igra = Igra.getInstance();
-                    if (toi.igra.getIgraci().size() == 1) {
-                        toi.prviIgrac = Igra.getInstance().getIgraci().get(0);
-                    }
-                    toi.brojigraca = toi.igra.getIgraci().size() == 1 ? 1 : 0;
+//                    if (toi.igra.getIgraci().size() == 1) {
+//                        toi.prviIgrac = Igra.getInstance().getIgraci().get(0);
+//                    }
+//                    toi.brojigraca = toi.igra.getIgraci().size() == 1 ? 1 : 0;
                     System.out.println("Igra je dodata do toi");
-                    out.writeObject(toi);
+//                    out.writeObject(toi);
                 }
 
                 if (toi.nazivOperacije.equals("kreirajIgraca")) {
@@ -93,7 +82,7 @@ class Klijent extends Thread {
 //                        System.out.println("Sistemska operacija je kreirajIgraca - nema jos igraca");
 //                        toi.igra = Igra.getInstance();
 //                        toi.prviIgrac = Igra.getInstance().getIgraci().get(0);
-//                        toi.brojigraca = 1;
+                        toi.brojigraca = 1;
 //                        out.writeObject(toi);
 //                        obavestiProtivnika(toi);
 //                    }
@@ -101,17 +90,17 @@ class Klijent extends Thread {
                     if (Igra.getInstance().getIgraci().size() == 1) {
                         System.out.println("Sistemska operacija je kreirajIgraca - ima jedan igrac");
                         toi.igra = Igra.getInstance();
-                        toi.prviIgrac = Igra.getInstance().getIgraci().get(0);
-                        toi.brojigraca = 1;
+//                        toi.prviIgrac = Igra.getInstance().getIgraci().get(0);
+//                        toi.brojigraca = 1;
                         toi.poruka = "Prvi igrac je registrovan. Sistem ceka drugog igraca!!!";
-                        out.writeObject(toi);
-                        obavestiProtivnika(toi, "Prvi igrac je registrovan. Sistem ceka drugog igraca!!!");
+//                        out.writeObject(toi);
+//                        obavestiProtivnika(toi, "Prvi igrac je registrovan. Sistem ceka drugog igraca!!!");
                     }
 
                     if (Igra.getInstance().getIgraci().size() == 2) {
                         System.out.println("Sistemska operacija je kreirajIgraca - oba igraca su registrovana");
-
-//                        igra.dodajIgraca(toi.igr);
+//
+////                        igra.dodajIgraca(toi.igr);
                         Igra.getInstance().init();
                         toi.igra = Igra.getInstance();
                         toi.prviIgrac = Igra.getInstance().getIgraci().get(0);
@@ -127,41 +116,89 @@ class Klijent extends Thread {
                         toi.fazaPoteza = Igra.getInstance().vratiFazuPoteza();
                         toi.prviPotez = true;
                         toi.poruka = "Sistem je pronasao protivnika.Obavestavam zadnjeg ulogovanog!";
-                        out.writeObject(toi);
-                        obavestiProtivnika(toi, "Sistem je pronasao protivnika. Obavestavam zadnjeg ulogovanog!");
+//                        out.writeObject(toi);
+//                        obavestiProtivnika(toi, "Sistem je pronasao protivnika. Obavestavam zadnjeg ulogovanog!");
                     }
 
                 }
 
                 if (toi.nazivOperacije.equals("odigrajZlatnik")) {
                     System.out.println("Sistemska operacija je odigrajZlatnik.");
-                    obavestiProtivnika(toi, "Protivnik je odigrao zlatnik kartu. Obavestavam drugogo igraca!");
-                }
-
-                if (toi.nazivOperacije.equals("plati")) {
-                    System.out.println("Sistemska operacija je plati.");
-                    obavestiProtivnika(toi, "Protivnik je platio zlatnik kartom. Obavestavam drugogo igraca!");
-                }
-
-                if (toi.nazivOperacije.equals("promenaFaze")) {
-                    System.out.println("Sistemska operacija je promena faze.");
-                    obavestiProtivnika(toi, "Faza igre je promenjena. Obavestavam drugogo igraca!");
+                    if (toi.fazaPoteza == Faza.IZBACI_ZLATNIK) {
+                        if (toi.igracNaPotezu.vratiKorisnickoIme().equals(toi.prviIgrac.vratiKorisnickoIme())) {
+                            toi.rukaPrvogIgraca.remove(toi.odigranaKarta);
+                            toi.talonPrvogIgraca.dodajURedZlatnika(toi.odigranaKarta);
+                            toi.fazaPoteza = Faza.PLATI;
+                        } else {
+                            toi.rukaDrugogIgraca.remove(toi.odigranaKarta);
+                            toi.talonDrugogIgraca.dodajURedZlatnika(toi.odigranaKarta);
+                            toi.fazaPoteza = Faza.PLATI;
+                        }
+                    }
+//                    obavestiProtivnika(toi, "Protivnik je odigrao zlatnik kartu. Obavestavam drugogo igraca!");
                 }
 //
+                if (toi.nazivOperacije.equals("plati")) {
+                    System.out.println("Sistemska operacija je plati.");
+                    toi.fazaPoteza = Faza.IZBACI_VITEZA;
+//                    obavestiProtivnika(toi, "Protivnik je platio zlatnik kartom. Obavestavam drugogo igraca!");
+                }
+//
+//                if (toi.nazivOperacije.equals("promenaFaze")) {
+//                    System.out.println("Sistemska operacija je promena faze.");
+//                    obavestiProtivnika(toi, "Faza igre je promenjena. Obavestavam drugogo igraca!");
+//                }
+////
                 if (toi.nazivOperacije.equals("izbaciViteza")) {
                     System.out.println("Sistemska operacija je izbaci Viteza.");
-                    obavestiProtivnika(toi, "Protivnik je izbacio viteza. Obavestavam drugogo igraca!");
+                    if (toi.fazaPoteza == Faza.IZBACI_VITEZA) {
+                        if (toi.igracNaPotezu.vratiKorisnickoIme().equals(toi.prviIgrac.vratiKorisnickoIme())) {
+                            toi.rukaPrvogIgraca.remove(toi.odigranaKarta);
+                            toi.talonPrvogIgraca.dodajURedVitezova(toi.odigranaKarta);
+                            toi.fazaPoteza = Faza.NAPAD;
+                        } else {
+                            toi.rukaDrugogIgraca.remove(toi.odigranaKarta);
+                            toi.talonDrugogIgraca.dodajURedVitezova(toi.odigranaKarta);
+                            toi.fazaPoteza = Faza.NAPAD;
+                        }
+                    }
+//                    obavestiProtivnika(toi, "Protivnik je izbacio viteza. Obavestavam drugogo igraca!");
                 }
-
+//
                 if (toi.nazivOperacije.equals("napad")) {
                     System.out.println("Sistemska operacija je NAPAD.");
-                    obavestiProtivnika(toi, "Protivnik je napao vitezom. Obavestavam drugogo igraca!");
+                    if (toi.fazaPoteza == Faza.NAPAD) {
+                        if (toi.igracNaPotezu.vratiKorisnickoIme().equals(toi.prviIgrac.vratiKorisnickoIme())) {
+                            toi.talonPrvogIgraca.getRedVitezova().remove(toi.odigranaKarta);
+                            toi.talonPrvogIgraca.dodajURedNapad(toi.odigranaKarta);
+                            if (toi.prviPotez) {
+                                toi.fazaPoteza = Faza.IZBACI_ZLATNIK;
+                                toi.igracNaPotezu = toi.drugiIgrac;
+                                toi.prviPotez = false;
+                            } else {
+                                toi.fazaPoteza = Faza.ODBRANA;
+                                toi.igracNaPotezu = toi.drugiIgrac;
+                            }
+                        } else {
+                            toi.talonDrugogIgraca.getRedVitezova().remove(toi.odigranaKarta);
+                            toi.talonDrugogIgraca.dodajURedNapad(toi.odigranaKarta);
+                            if (toi.prviPotez) {
+                                toi.fazaPoteza = Faza.IZBACI_ZLATNIK;
+                                toi.igracNaPotezu = toi.prviIgrac;
+                                toi.prviPotez = false;
+                            } else {
+                                toi.fazaPoteza = Faza.ODBRANA;
+                                toi.igracNaPotezu = toi.prviIgrac;
+                            }
+                        }
+                    }
+//                    obavestiProtivnika(toi, "Protivnik je napao vitezom. Obavestavam drugogo igraca!");
                 }
-
-                if (toi.nazivOperacije.equals("odbrana")) {
-                    System.out.println("Sistemska operacija je Obrana.");
-                    obavestiProtivnika(toi, "Protivnik se brani vitezom. Obavestavam drugogo igraca!");
-                }
+//
+//                if (toi.nazivOperacije.equals("odbrana")) {
+//                    System.out.println("Sistemska operacija je Obrana.");
+//                    obavestiProtivnika(toi, "Protivnik se brani vitezom. Obavestavam drugogo igraca!");
+//                }
 
 //
 //                if (toi.nazivOperacije.equals("napadniVitezom")) {
@@ -173,11 +210,25 @@ class Klijent extends Thread {
 //                    }
                 // programski kod!!!
 //                System.out.println(toi);
-//                out.writeObject(toi);
+//                out.reset();
+                if (Igra.getInstance().getIgraci().size() <= 1) {
+                    System.out.println("do jednog igraca");
+                    out.writeObject(toi);
+                } else {
+                    System.out.println("dvojica igraca");
+                    obavestiSve(toi);
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
             System.out.println(e);
+        }
+    }
+
+    private void obavestiSve(TransferObjekatIgrac toi) throws IOException {
+        for (Klijent k : KontrolerServer.lkl) {
+            System.out.println("obavestavam klijenta " + k.iKlijent);
+            k.out.writeObject(toi);
         }
     }
 

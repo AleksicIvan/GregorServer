@@ -24,22 +24,22 @@ public class Lista {
         tok.signal = true;
     }
 
-    public Igrac nadjiKorisnika(TransferObjekatIgrac tok) {
-        tok.pronadjeniIgrac = null;
-        try {
-            int idIgraca = tok.igr.getIdIgraca();
-            Iterator<Igrac> it = lkor.iterator();
-            while (it.hasNext()) {
-                Igrac igr = it.next();
-                if (igr.equals(idIgraca)) {
-                    tok.pronadjeniIgrac = igr;
-                    tok.indeks = lkor.indexOf(igr);
-                    return igr;
-                }
-            }
-        } catch (NumberFormatException e) {
-            System.out.println("Pogresan unos vrednosti u polje id igraca!!!");
-        }
-        return null;
-    }
+//    public Igrac nadjiKorisnika(TransferObjekatIgrac tok) {
+//        tok.pronadjeniIgrac = null;
+//        try {
+//            int idIgraca = tok.igr.getIdIgraca();
+//            Iterator<Igrac> it = lkor.iterator();
+//            while (it.hasNext()) {
+//                Igrac igr = it.next();
+//                if (igr.equals(idIgraca)) {
+//                    tok.pronadjeniIgrac = igr;
+//                    tok.indeks = lkor.indexOf(igr);
+//                    return igr;
+//                }
+//            }
+//        } catch (NumberFormatException e) {
+//            System.out.println("Pogresan unos vrednosti u polje id igraca!!!");
+//        }
+//        return null;
+//    }
 }
