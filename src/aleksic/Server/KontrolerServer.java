@@ -1,5 +1,7 @@
 package aleksic.Server;
 
+import aleksic.Models.Karta;
+import aleksic.Models.TipKarte;
 import aleksic.Servis.Faza;
 import aleksic.Servis.Igra;
 import aleksic.TransferObjekat.TransferObjekatIgrac;
@@ -113,8 +115,24 @@ class Klijent extends Thread {
                         toi.rukaDrugogIgraca = Igra.getInstance().getIgraci().get(1).vratiRuku();
                         toi.igracNaPotezu = Igra.getInstance().vratiIgracaNaPotezu();
                         toi.brojigraca = 2;
-                        toi.fazaPoteza = Igra.getInstance().vratiFazuPoteza();
-                        toi.prviPotez = true;
+                        toi.fazaPoteza = Faza.IZBACI_ZLATNIK;
+                        if (toi.igracNaPotezu.vratiKorisnickoIme().equals(toi.prviIgrac.vratiKorisnickoIme())) {
+                            // prvi na potezu
+                            if (toi.rukaPrvogIgraca.stream().filter(k -> k.vratiTipKarte().equals(TipKarte.ZLATNIK)).count() > 0) {
+                                toi.prviPotez = true;
+                            } else {
+                                toi.prviPotez = false;
+                                toi.igracNaPotezu = toi.drugiIgrac;
+                            }
+                        } else {
+                            // drugi na potezu
+                            if (toi.rukaDrugogIgraca.stream().filter(k -> k.vratiTipKarte().equals(TipKarte.ZLATNIK)).count() > 0) {
+                                toi.prviPotez = true;
+                            } else {
+                                toi.prviPotez = false;
+                                toi.igracNaPotezu = toi.prviIgrac;
+                            }
+                        }
                         toi.poruka = "Sistem je pronasao protivnika.Obavestavam zadnjeg ulogovanog!";
 //                        out.writeObject(toi);
 //                        obavestiProtivnika(toi, "Sistem je pronasao protivnika. Obavestavam zadnjeg ulogovanog!");
@@ -139,66 +157,185 @@ class Klijent extends Thread {
                 }
 //
                 if (toi.nazivOperacije.equals("plati")) {
+                    // TODO omoguci placanje sa vise zlatnika ukoliko ih ima u redu zlatnika
                     System.out.println("Sistemska operacija je plati.");
-                    toi.fazaPoteza = Faza.IZBACI_VITEZA;
+                    if (toi.igracNaPotezu.vratiKorisnickoIme().equals(toi.prviIgrac.vratiKorisnickoIme())) {
+                        // prvi na potezu
+                        if (toi.rukaPrvogIgraca.stream().filter(k -> k.vratiTipKarte().equals(TipKarte.VITEZ)).count() > 0) {
+                            toi.fazaPoteza = Faza.IZBACI_VITEZA;
+                        } else if (toi.talonPrvogIgraca.getRedVitezova().stream().filter(k -> k.vratiTipKarte().equals(TipKarte.VITEZ)).count() > 0) {
+                            toi.fazaPoteza = Faza.NAPAD;
+                            toi.igracNaPotezu = toi.drugiIgrac;
+                        } else {
+                            toi.fazaPoteza = Faza.IZBACI_ZLATNIK;
+                            toi.igracNaPotezu = toi.drugiIgrac;
+                        }
+                    } else {
+                        // drugi na potezu
+                        if (toi.rukaDrugogIgraca.stream().filter(k -> k.vratiTipKarte().equals(TipKarte.VITEZ)).count() > 0) {
+                            toi.fazaPoteza = Faza.IZBACI_VITEZA;
+                        } else if (toi.talonDrugogIgraca.getRedVitezova().stream().filter(k -> k.vratiTipKarte().equals(TipKarte.VITEZ)).count() > 0) {
+                            toi.fazaPoteza = Faza.NAPAD;
+                            toi.igracNaPotezu = toi.prviIgrac;
+                        } else {
+                            toi.fazaPoteza = Faza.IZBACI_ZLATNIK;
+                            toi.igracNaPotezu = toi.prviIgrac;
+                        }
+                    }
 //                    obavestiProtivnika(toi, "Protivnik je platio zlatnik kartom. Obavestavam drugogo igraca!");
                 }
-//
-//                if (toi.nazivOperacije.equals("promenaFaze")) {
-//                    System.out.println("Sistemska operacija je promena faze.");
-//                    obavestiProtivnika(toi, "Faza igre je promenjena. Obavestavam drugogo igraca!");
-//                }
-////
+
                 if (toi.nazivOperacije.equals("izbaciViteza")) {
+                    // TODO omoguci izbacivanje vise viteza koliko ih ima u ruci i ako je placeno za njih
                     System.out.println("Sistemska operacija je izbaci Viteza.");
                     if (toi.fazaPoteza == Faza.IZBACI_VITEZA) {
                         if (toi.igracNaPotezu.vratiKorisnickoIme().equals(toi.prviIgrac.vratiKorisnickoIme())) {
                             toi.rukaPrvogIgraca.remove(toi.odigranaKarta);
                             toi.talonPrvogIgraca.dodajURedVitezova(toi.odigranaKarta);
-                            toi.fazaPoteza = Faza.NAPAD;
+                            if (toi.prviPotez) {
+                                toi.prviPotez = false;
+                                // izracunati da li drugi igrac moze da odigra zlatnik ako ne
+                                if (toi.rukaPrvogIgraca.stream().filter(k -> k.vratiTipKarte().equals(TipKarte.ZLATNIK)).count() > 0) {
+                                    toi.fazaPoteza = Faza.IZBACI_ZLATNIK;
+                                    toi.igracNaPotezu = toi.drugiIgrac;
+                                } else {
+                                    toi.fazaPoteza = Faza.NAPAD;
+                                }
+                            } else {
+                                toi.fazaPoteza = Faza.NAPAD;
+                            }
                         } else {
                             toi.rukaDrugogIgraca.remove(toi.odigranaKarta);
                             toi.talonDrugogIgraca.dodajURedVitezova(toi.odigranaKarta);
-                            toi.fazaPoteza = Faza.NAPAD;
+                            if (toi.prviPotez) {
+                                toi.prviPotez = false;
+                                if (toi.rukaDrugogIgraca.stream().filter(k -> k.vratiTipKarte().equals(TipKarte.ZLATNIK)).count() > 0) {
+                                    toi.fazaPoteza = Faza.IZBACI_ZLATNIK;
+                                    toi.igracNaPotezu = toi.prviIgrac;
+                                } else {
+                                    toi.fazaPoteza = Faza.NAPAD;
+                                }
+                            } else {
+                                toi.fazaPoteza = Faza.NAPAD;
+                            }
                         }
                     }
 //                    obavestiProtivnika(toi, "Protivnik je izbacio viteza. Obavestavam drugogo igraca!");
                 }
 //
                 if (toi.nazivOperacije.equals("napad")) {
+                    // TODO omoguci napad sa vise viteza koliko ih ima u redu vitezova
                     System.out.println("Sistemska operacija je NAPAD.");
                     if (toi.fazaPoteza == Faza.NAPAD) {
                         if (toi.igracNaPotezu.vratiKorisnickoIme().equals(toi.prviIgrac.vratiKorisnickoIme())) {
                             toi.talonPrvogIgraca.getRedVitezova().remove(toi.odigranaKarta);
                             toi.talonPrvogIgraca.dodajURedNapad(toi.odigranaKarta);
-                            if (toi.prviPotez) {
-                                toi.fazaPoteza = Faza.IZBACI_ZLATNIK;
-                                toi.igracNaPotezu = toi.drugiIgrac;
-                                toi.prviPotez = false;
-                            } else {
+                            if (toi.talonDrugogIgraca.getRedVitezova().stream().filter(k -> k.vratiTipKarte().equals(TipKarte.VITEZ)).count() > 0) {
                                 toi.fazaPoteza = Faza.ODBRANA;
                                 toi.igracNaPotezu = toi.drugiIgrac;
+                            } else {
+                                toi.fazaPoteza = Faza.IZRACUNAJ_ISHOD;
+                                // izracunaj i postavi zivot
                             }
                         } else {
                             toi.talonDrugogIgraca.getRedVitezova().remove(toi.odigranaKarta);
                             toi.talonDrugogIgraca.dodajURedNapad(toi.odigranaKarta);
-                            if (toi.prviPotez) {
-                                toi.fazaPoteza = Faza.IZBACI_ZLATNIK;
-                                toi.igracNaPotezu = toi.prviIgrac;
-                                toi.prviPotez = false;
-                            } else {
+                            if (toi.talonPrvogIgraca.getRedVitezova().stream().filter(k -> k.vratiTipKarte().equals(TipKarte.VITEZ)).count() > 0) {
                                 toi.fazaPoteza = Faza.ODBRANA;
                                 toi.igracNaPotezu = toi.prviIgrac;
+                            } else {
+                                toi.fazaPoteza = Faza.IZRACUNAJ_ISHOD;
+                                // izracunaj i postavi zivot
                             }
                         }
                     }
 //                    obavestiProtivnika(toi, "Protivnik je napao vitezom. Obavestavam drugogo igraca!");
                 }
 //
-//                if (toi.nazivOperacije.equals("odbrana")) {
-//                    System.out.println("Sistemska operacija je Obrana.");
+                if (toi.nazivOperacije.equals("odbrana")) {
+                    // TODO omoguci odbranu sa vise viteza koliko ih ima u redu vitezova
+                    System.out.println("Sistemska operacija je Odbrana.");
+                    if (toi.fazaPoteza == Faza.ODBRANA) {
+                        if (toi.igracNaPotezu.vratiKorisnickoIme().equals(toi.prviIgrac.vratiKorisnickoIme())) {
+                            toi.talonPrvogIgraca.getRedVitezova().remove(toi.odigranaKarta);
+                            toi.talonPrvogIgraca.dodajURedNapad(toi.odigranaKarta);
+                            toi.talonPrvogIgraca.dodajURedOdbrana(toi.odigranaKarta);
+                            toi.fazaPoteza = Faza.IZRACUNAJ_ISHOD;
+                            int napad = 0;
+                            for (int i = 0; i < toi.talonDrugogIgraca.getRedNapad().size(); i++) {
+                                napad = toi.talonDrugogIgraca.getRedNapad().get(i).getNapad() + napad;
+                            }
+                            int odbrana = 0;
+                            for (int i = 0; i < toi.talonPrvogIgraca.getRedOdbrana().size(); i++) {
+                                odbrana = toi.talonPrvogIgraca.getRedOdbrana().get(i).getOdbrana() + odbrana;
+                            }
+                            System.out.println("napad: " + napad);
+                            System.out.println("odbrana: " + odbrana);
+                            if (odbrana == 1) {
+                                toi.talonDrugogIgraca.setRedNapad(new ArrayList<>());
+                            } else {
+                                for(int x = toi.talonDrugogIgraca.getRedNapad().size() - 1; x >= odbrana; x--) {
+                                    toi.talonDrugogIgraca.getRedNapad().remove(x);
+                                }
+                            }
+
+                            if (napad == 1) {
+                                toi.talonPrvogIgraca.setRedNapad(new ArrayList<>());
+                                toi.talonPrvogIgraca.setRedOdbrana(new ArrayList<>());
+                            } else {
+                                for(int x = toi.talonPrvogIgraca.getRedNapad().size() - 1; x >= napad; x--) {
+                                    toi.talonPrvogIgraca.getRedNapad().remove(x);
+                                }
+                                for(int x = toi.talonPrvogIgraca.getRedOdbrana().size() - 1; x >= napad; x--) {
+                                    toi.talonPrvogIgraca.getRedOdbrana().remove(x);
+                                }
+                            }
+                            System.out.println("nakon napada: " + toi.talonDrugogIgraca.getRedNapad().size());
+                            System.out.println("nakon odbrane: " + toi.talonPrvogIgraca.getRedOdbrana().size());
+
+                            toi.igracNaPotezu = toi.drugiIgrac;
+                        } else {
+                            toi.talonDrugogIgraca.getRedVitezova().remove(toi.odigranaKarta);
+                            toi.talonDrugogIgraca.dodajURedNapad(toi.odigranaKarta);
+                            toi.talonDrugogIgraca.dodajURedOdbrana(toi.odigranaKarta);
+                            toi.fazaPoteza = Faza.IZRACUNAJ_ISHOD;
+                            int napad = 0;
+                            for (int i = 0; i < toi.talonPrvogIgraca.getRedNapad().size(); i++) {
+                                napad = toi.talonPrvogIgraca.getRedNapad().get(i).getNapad() + napad;
+                            }
+                            int odbrana = 0;
+                            for (int i = 0; i < toi.talonDrugogIgraca.getRedOdbrana().size(); i++) {
+                                odbrana = toi.talonDrugogIgraca.getRedOdbrana().get(i).getOdbrana() + odbrana;
+                            }
+                            System.out.println("napad: " + napad);
+                            System.out.println("odbrana: " + odbrana);
+                            if (odbrana == 1) {
+                                toi.talonPrvogIgraca.setRedNapad(new ArrayList<>());
+                            } else {
+                                for(int x = toi.talonPrvogIgraca.getRedNapad().size() - 1; x >= odbrana; x--) {
+                                    toi.talonPrvogIgraca.getRedNapad().remove(x);
+                                }
+                            }
+
+                            if (napad == 1) {
+                                toi.talonDrugogIgraca.setRedNapad(new ArrayList<>());
+                                toi.talonDrugogIgraca.setRedOdbrana(new ArrayList<>());
+                            } else {
+                                for(int x = toi.talonPrvogIgraca.getRedNapad().size() - 1; x >= napad; x--) {
+                                    toi.talonDrugogIgraca.getRedNapad().remove(x);
+                                }
+                                for(int x = toi.talonPrvogIgraca.getRedOdbrana().size() - 1; x >= napad; x--) {
+                                    toi.talonDrugogIgraca.getRedOdbrana().remove(x);
+                                }
+                            }
+                            System.out.println("nakon napada: " + toi.talonPrvogIgraca.getRedNapad().size());
+                            System.out.println("nakon odbrane: " + toi.talonDrugogIgraca.getRedOdbrana().size());
+                        }
+                        toi.fazaPoteza = Faza.IZBACI_ZLATNIK;
+                        toi.igracNaPotezu = toi.prviIgrac;
+                    }
 //                    obavestiProtivnika(toi, "Protivnik se brani vitezom. Obavestavam drugogo igraca!");
-//                }
+                }
 
 //
 //                if (toi.nazivOperacije.equals("napadniVitezom")) {
