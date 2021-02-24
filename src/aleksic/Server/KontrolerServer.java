@@ -14,7 +14,6 @@ import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 public class KontrolerServer {
@@ -282,6 +281,11 @@ class Klijent extends Thread {
                     izracunajIshod(toi);
                 }
 
+                if (toi.nazivOperacije.equals("preskociFazu")) {
+                    System.out.println("Sistemska operacija je preskociFazu.");
+                    izracunajSledecuFazu(toi);
+                }
+
 //
 //                if (toi.nazivOperacije.equals("napadniVitezom")) {
 //                    System.out.println("Sistemska operacija je napadni vitezom.");
@@ -302,6 +306,35 @@ class Klijent extends Thread {
         } catch (Exception e) {
             e.printStackTrace();
             System.out.println(e);
+        }
+    }
+
+    private void izracunajSledecuFazu(TransferObjekatIgrac toi) {
+        System.out.println("toi faza poteza je " + toi.fazaPoteza.toString());
+        switch (toi.fazaPoteza) {
+            case IZBACI_ZLATNIK:
+                System.out.println("IZBACI_ZLATNIK");
+                toi.fazaPoteza = Faza.PLATI;
+                break;
+            case PLATI:
+                System.out.println("PLATI");
+                toi.fazaPoteza = Faza.IZBACI_VITEZA;
+                break;
+            case IZBACI_VITEZA:
+                System.out.println("IZBACI_VITEZA");
+                toi.fazaPoteza = Faza.NAPAD;
+                break;
+            case NAPAD:
+                System.out.println("NAPAD");
+                toi.fazaPoteza = Faza.ODBRANA;
+                break;
+            case ODBRANA:
+                System.out.println("ODBRANA");
+                toi.fazaPoteza = Faza.IZRACUNAJ_ISHOD;
+                break;
+            default:
+                System.out.println("default IZBACI_ZLATNIK");
+                toi.fazaPoteza = Faza.IZBACI_ZLATNIK;
         }
     }
 
