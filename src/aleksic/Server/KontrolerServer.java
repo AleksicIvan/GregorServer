@@ -1,9 +1,6 @@
 package aleksic.Server;
 
-import aleksic.Models.Karta;
-import aleksic.Models.Talon;
-import aleksic.Models.TipKarte;
-import aleksic.Models.Vitez;
+import aleksic.Models.*;
 import aleksic.Servis.Faza;
 import aleksic.Servis.Igra;
 import aleksic.TransferObjekat.TransferObjekatIgrac;
@@ -151,84 +148,63 @@ class Klijent extends Thread {
 
                 }
 
+                if (toi.nazivOperacije.equals("dodeliKartu")) {
+                    System.out.println("Sistemska operacija je dodeliKartu.");
+                    if (isPrviIgracNaPotezu(toi)) {
+                        dodeliKartuIzSpila(toi.spilPrvogIgraca, toi.rukaPrvogIgraca);
+                    } else {
+                        dodeliKartuIzSpila(toi.spilDrugogIgraca, toi.rukaDrugogIgraca);
+                    }
+                    izracunajSledecuFazu(toi);
+                }
+
                 if (toi.nazivOperacije.equals("odigrajZlatnik")) {
                     // odigrava se uvek jedan zlatnik
                     System.out.println("Sistemska operacija je odigrajZlatnik.");
-                    if (toi.fazaPoteza == Faza.IZBACI_ZLATNIK) {
+                    if (toi.fazaPoteza.equals(Faza.IZBACI_ZLATNIK)) {
                         if (isPrviIgracNaPotezu(toi)) {
                             toi.rukaPrvogIgraca.remove(toi.odigranaKarta);
                             toi.talonPrvogIgraca.dodajURedZlatnika(toi.odigranaKarta);
-                            toi.fazaPoteza = Faza.PLATI;
                         } else {
                             toi.rukaDrugogIgraca.remove(toi.odigranaKarta);
                             toi.talonDrugogIgraca.dodajURedZlatnika(toi.odigranaKarta);
-                            toi.fazaPoteza = Faza.PLATI;
                         }
+                        izracunajSledecuFazu(toi);
                     }
-//                    obavestiProtivnika(toi, "Protivnik je odigrao zlatnik kartu. Obavestavam drugogo igraca!");
                 }
 //
                 if (toi.nazivOperacije.equals("plati")) {
                     // TODO omoguci placanje sa vise zlatnika ukoliko ih ima u redu zlatnika
                     System.out.println("Sistemska operacija je plati.");
-                    if (isPrviIgracNaPotezu(toi)) {
-                        // prvi na potezu
-                        if (toi.rukaPrvogIgraca.stream().filter(k -> k.vratiTipKarte().equals(TipKarte.VITEZ)).count() > 0) {
-                            toi.fazaPoteza = Faza.IZBACI_VITEZA;
-                        } else if (toi.talonPrvogIgraca.getRedVitezova().stream().filter(k -> k.vratiTipKarte().equals(TipKarte.VITEZ)).count() > 0) {
-                            toi.fazaPoteza = Faza.NAPAD;
-                            toi.igracNaPotezu = toi.drugiIgrac;
-                        } else {
-                            toi.fazaPoteza = Faza.IZBACI_ZLATNIK;
-                            toi.igracNaPotezu = toi.drugiIgrac;
-                        }
-                    } else {
-                        // drugi na potezu
-                        if (toi.rukaDrugogIgraca.stream().filter(k -> k.vratiTipKarte().equals(TipKarte.VITEZ)).count() > 0) {
-                            toi.fazaPoteza = Faza.IZBACI_VITEZA;
-                        } else if (toi.talonDrugogIgraca.getRedVitezova().stream().filter(k -> k.vratiTipKarte().equals(TipKarte.VITEZ)).count() > 0) {
-                            toi.fazaPoteza = Faza.NAPAD;
-                            toi.igracNaPotezu = toi.prviIgrac;
-                        } else {
-                            toi.fazaPoteza = Faza.IZBACI_ZLATNIK;
-                            toi.igracNaPotezu = toi.prviIgrac;
-                        }
-                    }
+                    izracunajSledecuFazu(toi);
                 }
 
                 if (toi.nazivOperacije.equals("izbaciViteza")) {
                     // TODO omoguci izbacivanje vise viteza koliko ih ima u ruci i ako je placeno za njih
                     System.out.println("Sistemska operacija je izbaci Viteza.");
+                    System.out.println("prvi potez >> " + toi.prviPotez);
                     if (toi.fazaPoteza == Faza.IZBACI_VITEZA) {
                         if (isPrviIgracNaPotezu(toi)) {
                             setRedVitezova(toi.rukaPrvogIgraca, toi.kliknutiVItezovi, toi.talonPrvogIgraca);
-                            if (toi.prviPotez) {
+                            if (toi.prviPotez == true) {
                                 toi.prviPotez = false;
-                                // izracunati da li drugi igrac moze da odigra zlatnik ako ne
-                                if (toi.rukaPrvogIgraca.stream().filter(k -> k.vratiTipKarte().equals(TipKarte.ZLATNIK)).count() > 0) {
-                                    toi.fazaPoteza = Faza.IZBACI_ZLATNIK;
-                                    toi.igracNaPotezu = toi.drugiIgrac;
-                                } else {
-                                    toi.fazaPoteza = Faza.NAPAD;
-                                }
+                                toi.igracNaPotezu = toi.drugiIgrac;
+                                toi.fazaPoteza = Faza.DODELI_KARTU;
                             } else {
-                                toi.fazaPoteza = Faza.NAPAD;
+                                izracunajSledecuFazu(toi);
                             }
                         } else {
                             setRedVitezova(toi.rukaDrugogIgraca, toi.kliknutiVItezovi, toi.talonDrugogIgraca);
-                            if (toi.prviPotez) {
+                            if (toi.prviPotez == true) {
                                 toi.prviPotez = false;
-                                if (toi.rukaDrugogIgraca.stream().filter(k -> k.vratiTipKarte().equals(TipKarte.ZLATNIK)).count() > 0) {
-                                    toi.fazaPoteza = Faza.IZBACI_ZLATNIK;
-                                    toi.igracNaPotezu = toi.prviIgrac;
-                                } else {
-                                    toi.fazaPoteza = Faza.NAPAD;
-                                }
+                                toi.igracNaPotezu = toi.prviIgrac;
+                                toi.fazaPoteza = Faza.DODELI_KARTU;
                             } else {
-                                toi.fazaPoteza = Faza.NAPAD;
+                                izracunajSledecuFazu(toi);
                             }
                         }
                     }
+                    toi.kliknutiVItezovi.clear();
                 }
 
                 if (toi.nazivOperacije.equals("napad")) {
@@ -239,40 +215,50 @@ class Klijent extends Thread {
 //                            toi.talonPrvogIgraca.getRedVitezova().remove(toi.odigranaKarta);
 //                            toi.talonPrvogIgraca.dodajURedNapad(toi.odigranaKarta);
                             setRedNapadIOdbrana(toi.kliknutiVItezovi, toi.talonPrvogIgraca);
-                            if (toi.talonDrugogIgraca.getRedVitezova().stream().filter(k -> k.vratiTipKarte().equals(TipKarte.VITEZ)).count() > 0) {
-                                toi.fazaPoteza = Faza.ODBRANA;
-                                toi.igracNaPotezu = toi.drugiIgrac;
-                            } else {
-                                toi.fazaPoteza = Faza.IZRACUNAJ_ISHOD;
-                                // izracunaj i postavi zivot
-                            }
+                            izracunajSledecuFazu(toi);
+                            toi.igracNaPotezu = toi.drugiIgrac;
+//                            if (toi.talonDrugogIgraca.getRedVitezova().stream().filter(k -> k.vratiTipKarte().equals(TipKarte.VITEZ)).count() > 0) {
+//                                toi.fazaPoteza = Faza.ODBRANA;
+//                                toi.igracNaPotezu = toi.drugiIgrac;
+//                            } else {
+//                                toi.fazaPoteza = Faza.IZRACUNAJ_ISHOD;
+//                                // izracunaj i postavi zivot
+//                            }
                         } else {
 //                            toi.talonDrugogIgraca.getRedVitezova().remove(toi.odigranaKarta);
 //                            toi.talonDrugogIgraca.dodajURedNapad(toi.odigranaKarta);
                             setRedNapadIOdbrana(toi.kliknutiVItezovi, toi.talonDrugogIgraca);
-                            if (toi.talonPrvogIgraca.getRedVitezova().stream().filter(k -> k.vratiTipKarte().equals(TipKarte.VITEZ)).count() > 0) {
-                                toi.fazaPoteza = Faza.ODBRANA;
-                                toi.igracNaPotezu = toi.prviIgrac;
-                            } else {
-                                toi.fazaPoteza = Faza.IZRACUNAJ_ISHOD;
-                                // izracunaj i postavi zivot
-                            }
+                            izracunajSledecuFazu(toi);
+                            toi.igracNaPotezu = toi.prviIgrac;
+//                            if (toi.talonPrvogIgraca.getRedVitezova().stream().filter(k -> k.vratiTipKarte().equals(TipKarte.VITEZ)).count() > 0) {
+//                                toi.fazaPoteza = Faza.ODBRANA;
+//                                toi.igracNaPotezu = toi.prviIgrac;
+//                            } else {
+//                                toi.fazaPoteza = Faza.IZRACUNAJ_ISHOD;
+//                                // izracunaj i postavi zivot
+//                            }
                         }
+
                     }
+                    toi.kliknutiVItezovi.clear();
                 }
 //
                 if (toi.nazivOperacije.equals("odbrana")) {
                     // TODO omoguci odbranu sa vise viteza koliko ih ima u redu vitezova
                     System.out.println("Sistemska operacija je Odbrana.");
-                    if (toi.fazaPoteza == Faza.ODBRANA) {
-                        if (isPrviIgracNaPotezu(toi)) {
-                            setRedNapadIOdbrana(toi.kliknutiVItezovi, toi.talonPrvogIgraca);
-                            toi.fazaPoteza = Faza.IZRACUNAJ_ISHOD;
-                        } else {
-                            setRedNapadIOdbrana(toi.kliknutiVItezovi, toi.talonDrugogIgraca);
-                            toi.fazaPoteza = Faza.IZRACUNAJ_ISHOD;
-                        }
+//                    if (toi.fazaPoteza == Faza.ODBRANA) {
+                    if (isPrviIgracNaPotezu(toi)) {
+                        setRedNapadIOdbrana(toi.kliknutiVItezovi, toi.talonPrvogIgraca);
+                        toi.igracNaPotezu = toi.drugiIgrac;
+                        toi.fazaPoteza = Faza.IZRACUNAJ_ISHOD;
+                    } else {
+                        setRedNapadIOdbrana(toi.kliknutiVItezovi, toi.talonDrugogIgraca);
+                        toi.igracNaPotezu = toi.prviIgrac;
+                        toi.fazaPoteza = Faza.IZRACUNAJ_ISHOD;
                     }
+                    toi.kliknutiVItezovi.clear();
+//                    izracunajSledecuFazu(toi);
+//                    }
                 }
 
                 if (toi.nazivOperacije.equals("izracunajIshod")) {
@@ -282,7 +268,19 @@ class Klijent extends Thread {
                 }
 
                 if (toi.nazivOperacije.equals("preskociFazu")) {
-                    System.out.println("Sistemska operacija je preskociFazu.");
+                    System.out.println("Sistemska operacija je preskociFazu " + toi.fazaPoteza);
+                    if (toi.fazaPoteza.equals(Faza.NAPAD)) {
+                        toi.igracNaPotezu = isPrviIgracNaPotezu(toi) ? toi.drugiIgrac : toi.prviIgrac;
+                        System.out.println("preskocio sam fazu NAPAD i igrac na potezu je: " + toi.igracNaPotezu.vratiKorisnickoIme());
+                    }
+                    if (toi.fazaPoteza.equals(Faza.ODBRANA)) {
+                        toi.igracNaPotezu = isPrviIgracNaPotezu(toi) ? toi.drugiIgrac : toi.prviIgrac;
+                        System.out.println("preskocio sam fazu ODBRANA i igrac na potezu je: " + toi.igracNaPotezu.vratiKorisnickoIme());
+                    }
+                    if (toi.fazaPoteza.equals(Faza.IZRACUNAJ_ISHOD)) {
+                        toi.igracNaPotezu = isPrviIgracNaPotezu(toi) ? toi.drugiIgrac : toi.prviIgrac;
+                        System.out.println("preskocio sam fazu IZRACUNAJ_ISHOD i igrac na potezu je: " + toi.igracNaPotezu.vratiKorisnickoIme());
+                    }
                     izracunajSledecuFazu(toi);
                 }
 
@@ -309,9 +307,19 @@ class Klijent extends Thread {
         }
     }
 
+    private void dodeliKartuIzSpila (List<Karta> spil, List<Karta> igracevaRuka) {
+        Karta prvaKarta = spil.get(0);
+        spil.remove(prvaKarta);
+        igracevaRuka.add(prvaKarta);
+    }
+
     private void izracunajSledecuFazu(TransferObjekatIgrac toi) {
         System.out.println("toi faza poteza je " + toi.fazaPoteza.toString());
         switch (toi.fazaPoteza) {
+            case DODELI_KARTU:
+                System.out.println("DODELI_KARTU");
+                toi.fazaPoteza = Faza.IZBACI_ZLATNIK;
+                break;
             case IZBACI_ZLATNIK:
                 System.out.println("IZBACI_ZLATNIK");
                 toi.fazaPoteza = Faza.PLATI;
@@ -332,13 +340,16 @@ class Klijent extends Thread {
                 System.out.println("ODBRANA");
                 toi.fazaPoteza = Faza.IZRACUNAJ_ISHOD;
                 break;
+            case IZRACUNAJ_ISHOD:
+                toi.fazaPoteza = Faza.DODELI_KARTU;
+                break;
             default:
-                System.out.println("default IZBACI_ZLATNIK");
-                toi.fazaPoteza = Faza.IZBACI_ZLATNIK;
+                System.out.println("default default default default default DODELI_KARTU!!!!");
+                toi.fazaPoteza = Faza.DODELI_KARTU;
         }
     }
 
-    private void setRedVitezova(List<Karta> ruka, List<Vitez> odabraniVitezovi, Talon igracevTalon) {
+    private void setRedVitezova(List<Karta> ruka, List<Karta> odabraniVitezovi, Talon igracevTalon) {
         for (int i = 0; i < odabraniVitezovi.size(); i++) {
             for (int j = 0; j < ruka.size(); j++) {
                 if (odabraniVitezovi.get(i).getId().equals(ruka.get(j).getId())) {
@@ -349,7 +360,7 @@ class Klijent extends Thread {
         }
     }
 
-    private void setRedNapadIOdbrana(List<Vitez> odabraniVitezovi, Talon igracevTalon) {
+    private void setRedNapadIOdbrana(List<Karta> odabraniVitezovi, Talon igracevTalon) {
         for (int i = 0; i < odabraniVitezovi.size(); i++) {
             for (int j = 0; j < igracevTalon.getRedVitezova().size(); j++) {
                 if (odabraniVitezovi.get(i).getId().equals(igracevTalon.getRedVitezova().get(j).getId())) {
@@ -362,21 +373,25 @@ class Klijent extends Thread {
     }
 
     private void izracunajIshod (TransferObjekatIgrac toi) {
+        System.out.println("igrac na potezu : " + toi.igracNaPotezu.vratiKorisnickoIme());
         if (isPrviIgracNaPotezu(toi)) {
 //                            toi.talonPrvogIgraca.getRedVitezova().remove(toi.odigranaKarta);
 //                            toi.talonPrvogIgraca.dodajURedNapad(toi.odigranaKarta);
 //                            toi.talonPrvogIgraca.dodajURedOdbrana(toi.odigranaKarta);
-            setRedNapadIOdbrana(toi.kliknutiVItezovi, toi.talonPrvogIgraca);
-            toi.fazaPoteza = Faza.IZRACUNAJ_ISHOD;
+            setRedNapadIOdbrana(toi.talonPrvogIgraca.getRedVitezova(), toi.talonPrvogIgraca);
+//            toi.fazaPoteza = Faza.IZRACUNAJ_ISHOD;
             int napad = 0;
+            int odbrana = 0;
+
             for (int i = 0; i < toi.talonDrugogIgraca.getRedNapad().size(); i++) {
                 napad = toi.talonDrugogIgraca.getRedNapad().get(i).getNapad() + napad;
             }
-            int odbrana = 0;
             for (int i = 0; i < toi.talonPrvogIgraca.getRedOdbrana().size(); i++) {
                 odbrana = toi.talonPrvogIgraca.getRedOdbrana().get(i).getOdbrana() + odbrana;
             }
+            System.out.println("size of toi.talonDrugogIgraca.getRedNapad(): " + toi.talonDrugogIgraca.getRedNapad().size());
             System.out.println("napad: " + napad);
+            System.out.println("size of toi.talonPrvogIgraca.getRedOdbrana(): " +toi.talonPrvogIgraca.getRedOdbrana());
             System.out.println("odbrana: " + odbrana);
             if (odbrana == 1) {
                 toi.talonDrugogIgraca.setRedNapad(new ArrayList<>());
@@ -405,8 +420,8 @@ class Klijent extends Thread {
 //                            toi.talonDrugogIgraca.getRedVitezova().remove(toi.odigranaKarta);
 ////                            toi.talonDrugogIgraca.dodajURedNapad(toi.odigranaKarta);
 ////                            toi.talonDrugogIgraca.dodajURedOdbrana(toi.odigranaKarta);
-            setRedNapadIOdbrana(toi.kliknutiVItezovi, toi.talonDrugogIgraca);
-            toi.fazaPoteza = Faza.IZRACUNAJ_ISHOD;
+            setRedNapadIOdbrana(toi.talonDrugogIgraca.getRedVitezova(), toi.talonDrugogIgraca);
+//            toi.fazaPoteza = Faza.IZRACUNAJ_ISHOD;
             int napad = 0;
             for (int i = 0; i < toi.talonPrvogIgraca.getRedNapad().size(); i++) {
                 napad = toi.talonPrvogIgraca.getRedNapad().get(i).getNapad() + napad;
@@ -415,7 +430,9 @@ class Klijent extends Thread {
             for (int i = 0; i < toi.talonDrugogIgraca.getRedOdbrana().size(); i++) {
                 odbrana = toi.talonDrugogIgraca.getRedOdbrana().get(i).getOdbrana() + odbrana;
             }
+            System.out.println("size of toi.talonPrvogIgraca.getRedNapad(): " + toi.talonPrvogIgraca.getRedNapad().size());
             System.out.println("napad: " + napad);
+            System.out.println("size of toi.talonDrugogIgraca.getRedOdbrana(): " +toi.talonDrugogIgraca.getRedOdbrana());
             System.out.println("odbrana: " + odbrana);
             if (odbrana == 1) {
                 toi.talonPrvogIgraca.setRedNapad(new ArrayList<>());
@@ -440,7 +457,12 @@ class Klijent extends Thread {
             System.out.println("nakon odbrane: " + toi.talonDrugogIgraca.getRedOdbrana().size());
             toi.igracNaPotezu = toi.prviIgrac;
         }
-        toi.fazaPoteza = Faza.IZBACI_ZLATNIK;
+        toi.fazaPoteza = Faza.DODELI_KARTU;
+//        if (isPrviIgracNaPotezu(toi)) {
+//            dodeliKartuIzSpila(toi.spilPrvogIgraca, toi.rukaPrvogIgraca);
+//        } else {
+//            dodeliKartuIzSpila(toi.spilDrugogIgraca, toi.rukaDrugogIgraca);
+//        }
     }
 
     private void obavestiSve(TransferObjekatIgrac toi) throws IOException {

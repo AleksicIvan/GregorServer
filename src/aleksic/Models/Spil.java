@@ -34,6 +34,15 @@ public class Spil implements Serializable {
         return this.tekucaRuka;
     }
 
+    public List<Karta> getTekuciSpil() {
+        return tekuciSpil;
+    }
+
+    public void setTekuciSpil(List<Karta> tekuciSpil) {
+        this.tekuciSpil = tekuciSpil;
+    }
+
+
     @Override
     public String toString() {
         return "Spil{" +

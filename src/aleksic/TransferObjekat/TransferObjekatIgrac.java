@@ -22,7 +22,7 @@ public class TransferObjekatIgrac implements Serializable {
     public int brojigraca;
     public int brojPoteza;
     public List<Zlatnik> kliknutiZlatnici;
-    public List<Vitez> kliknutiVItezovi;
+    public List<Karta> kliknutiVItezovi;
     public List<Karta> rukaPrvogIgraca;
     public List<Karta> spilPrvogIgraca;
     public Talon talonPrvogIgraca;
