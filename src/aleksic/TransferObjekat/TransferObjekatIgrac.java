@@ -32,4 +32,12 @@ public class TransferObjekatIgrac implements Serializable {
     public Igrac igracNaPotezu;
     public Faza fazaPoteza;
     public boolean prviPotez;
+    public int sizeRedVitezovaPrviIgrac;
+    public int sizeRedVitezovaDrugiIgrac;
+    public List<Karta> redVitezovaPrviIgrac;
+    public List<Karta> redNapadPrviIgrac;
+    public List<Karta> redOdbranaPrviIgrac;
+    public List<Karta> redRedVitezovaDrugiIgrac;
+    public List<Karta> redNapadDrugiIgrac;
+    public List<Karta> redOdbranaDrugiIgrac;
 }

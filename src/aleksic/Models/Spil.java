@@ -10,11 +10,11 @@ public class Spil implements Serializable {
     private List<Karta> tekucaRuka = new ArrayList<>();
 
     public Spil() {
-        for (Integer i = 0; i <= 14; i++) {
+        for (int i = 0; i <= 7; i++) {
             this.tekuciSpil.add(new Zlatnik(i, null, null, 1, TipKarte.ZLATNIK, false));
         }
 
-        for (Integer i = 15; i <= 29; i++) {
+        for (int i = 12; i <= 24; i++) {
             this.tekuciSpil.add(new Vitez(i, 1, 1, 1, TipKarte.VITEZ, false));
         }
     }
@@ -25,7 +25,7 @@ public class Spil implements Serializable {
     }
 
     public List<Karta> podeliRuku (List<Karta> promesaniSpil) {
-        for (Integer i = 0; i <= 4; i++) {
+        for (int i = 0; i <= 4; i++) {
             Karta trenutnaKarta = this.tekuciSpil.get(i);
             this.tekucaRuka.add(trenutnaKarta);
             promesaniSpil.remove(this.tekuciSpil.indexOf(trenutnaKarta));

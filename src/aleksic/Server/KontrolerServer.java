@@ -74,41 +74,22 @@ class Klijent extends Thread {
                 if (toi.nazivOperacije.equals("init")) {
                     System.out.println("Sistemska operacija je init");
                     toi.igra = Igra.getInstance();
-//                    if (toi.igra.getIgraci().size() == 1) {
-//                        toi.prviIgrac = Igra.getInstance().getIgraci().get(0);
-//                    }
-//                    toi.brojigraca = toi.igra.getIgraci().size() == 1 ? 1 : 0;
                     System.out.println("Igra je dodata do toi");
-//                    out.writeObject(toi);
                 }
 
                 if (toi.nazivOperacije.equals("kreirajIgraca")) {
 //                    l.kreirajIgraca(toi);
                     Igra.getInstance().dodajIgraca(toi.igr);
-
-//                    if (Igra.getInstance().getIgraci().size() == 0) {
-//                        System.out.println("Sistemska operacija je kreirajIgraca - nema jos igraca");
-//                        toi.igra = Igra.getInstance();
-//                        toi.prviIgrac = Igra.getInstance().getIgraci().get(0);
-                        toi.brojigraca = 1;
-//                        out.writeObject(toi);
-//                        obavestiProtivnika(toi);
-//                    }
+                    toi.brojigraca = 1;
 
                     if (Igra.getInstance().getIgraci().size() == 1) {
                         System.out.println("Sistemska operacija je kreirajIgraca - ima jedan igrac");
                         toi.igra = Igra.getInstance();
-//                        toi.prviIgrac = Igra.getInstance().getIgraci().get(0);
-//                        toi.brojigraca = 1;
                         toi.poruka = "Prvi igrac je registrovan. Sistem ceka drugog igraca!!!";
-//                        out.writeObject(toi);
-//                        obavestiProtivnika(toi, "Prvi igrac je registrovan. Sistem ceka drugog igraca!!!");
                     }
 
                     if (Igra.getInstance().getIgraci().size() == 2) {
                         System.out.println("Sistemska operacija je kreirajIgraca - oba igraca su registrovana");
-//
-////                        igra.dodajIgraca(toi.igr);
                         Igra.getInstance().init();
                         toi.igra = Igra.getInstance();
                         toi.prviIgrac = Igra.getInstance().getIgraci().get(0);
@@ -124,26 +105,14 @@ class Klijent extends Thread {
                         toi.brojPoteza = 0;
                         incrementBrojPoteza(toi);
                         toi.fazaPoteza = Faza.IZBACI_ZLATNIK;
-                        if (isPrviIgracNaPotezu(toi)) {
-                            // prvi na potezu
-                            if (toi.rukaPrvogIgraca.stream().filter(k -> k.vratiTipKarte().equals(TipKarte.ZLATNIK)).count() > 0) {
-                                toi.prviPotez = true;
-                            } else {
-                                toi.prviPotez = false;
-                                toi.igracNaPotezu = toi.drugiIgrac;
-                            }
-                        } else {
-                            // drugi na potezu
-                            if (toi.rukaDrugogIgraca.stream().filter(k -> k.vratiTipKarte().equals(TipKarte.ZLATNIK)).count() > 0) {
-                                toi.prviPotez = true;
-                            } else {
-                                toi.prviPotez = false;
-                                toi.igracNaPotezu = toi.prviIgrac;
-                            }
-                        }
-                        toi.poruka = "Sistem je pronasao protivnika.Obavestavam zadnjeg ulogovanog!";
-//                        out.writeObject(toi);
-//                        obavestiProtivnika(toi, "Sistem je pronasao protivnika. Obavestavam zadnjeg ulogovanog!");
+                        toi.prviPotez = true;
+                        toi.redVitezovaPrviIgrac = new ArrayList<Karta>();
+                        toi.redNapadPrviIgrac = new ArrayList<Karta>();
+                        toi.redOdbranaPrviIgrac = new ArrayList<Karta>();
+                        toi.redRedVitezovaDrugiIgrac = new ArrayList<Karta>();
+                        toi.redNapadDrugiIgrac = new ArrayList<Karta>();
+                        toi.redOdbranaDrugiIgrac = new ArrayList<Karta>();
+                        toi.poruka = "Sistem je pronasao protivnika. Obavestavam zadnjeg ulogovanog!";
                     }
 
                 }
@@ -182,27 +151,59 @@ class Klijent extends Thread {
                 if (toi.nazivOperacije.equals("izbaciViteza")) {
                     // TODO omoguci izbacivanje vise viteza koliko ih ima u ruci i ako je placeno za njih
                     System.out.println("Sistemska operacija je izbaci Viteza.");
-                    System.out.println("prvi potez >> " + toi.prviPotez);
-                    if (toi.fazaPoteza == Faza.IZBACI_VITEZA) {
+                    if (toi.prviPotez) {
                         if (isPrviIgracNaPotezu(toi)) {
-                            setRedVitezova(toi.rukaPrvogIgraca, toi.kliknutiVItezovi, toi.talonPrvogIgraca);
-                            if (toi.prviPotez == true) {
-                                toi.prviPotez = false;
-                                toi.igracNaPotezu = toi.drugiIgrac;
-                                toi.fazaPoteza = Faza.DODELI_KARTU;
-                            } else {
-                                izracunajSledecuFazu(toi);
+                            for (int i = 0; i < toi.kliknutiVItezovi.size(); i++) {
+                                System.out.println("PETLJA odabrani vitezovi set red vitezova 1 prvi potez");
+                                toi.rukaPrvogIgraca.remove(toi.kliknutiVItezovi.get(i));
                             }
+                            ArrayList<Karta> nk = new ArrayList<>();
+                            nk.addAll(toi.redVitezovaPrviIgrac);
+                            nk.addAll(new ArrayList<>(toi.kliknutiVItezovi));
+                            toi.redVitezovaPrviIgrac = nk;
+                            toi.sizeRedVitezovaPrviIgrac = toi.redVitezovaPrviIgrac.size();
+                            toi.igracNaPotezu = toi.drugiIgrac;
+                            toi.fazaPoteza = Faza.DODELI_KARTU;
                         } else {
-                            setRedVitezova(toi.rukaDrugogIgraca, toi.kliknutiVItezovi, toi.talonDrugogIgraca);
-                            if (toi.prviPotez == true) {
-                                toi.prviPotez = false;
-                                toi.igracNaPotezu = toi.prviIgrac;
-                                toi.fazaPoteza = Faza.DODELI_KARTU;
-                            } else {
-                                izracunajSledecuFazu(toi);
+                            toi.igracNaPotezu = toi.prviIgrac;
+                            for (int i = 0; i < toi.kliknutiVItezovi.size(); i++) {
+                                System.out.println("PETLJA odabrani vitezovi set red vitezova 2 prvi potez");
+                                toi.rukaDrugogIgraca.remove(toi.kliknutiVItezovi.get(i));
                             }
+                            ArrayList<Karta> nk = new ArrayList<>();
+                            nk.addAll(toi.redRedVitezovaDrugiIgrac);
+                            nk.addAll(new ArrayList<>(toi.kliknutiVItezovi));
+                            toi.redRedVitezovaDrugiIgrac = nk;
+                            toi.sizeRedVitezovaDrugiIgrac = toi.redRedVitezovaDrugiIgrac.size();
+                            toi.fazaPoteza = Faza.DODELI_KARTU;
                         }
+                        toi.prviPotez = false;
+                    } else {
+                        System.out.println("nije prvi potez podesavam red vitezova");
+                        if (isPrviIgracNaPotezu(toi)) {
+                            for (int i = 0; i < toi.kliknutiVItezovi.size(); i++) {
+                                System.out.println("PETLJA odabrani vitezovi set red vitezova 1");
+                                toi.rukaPrvogIgraca.remove(toi.kliknutiVItezovi.get(i));
+                            }
+                            ArrayList<Karta> nk = new ArrayList<>();
+                            nk.addAll(toi.redVitezovaPrviIgrac);
+                            nk.addAll(new ArrayList<>(toi.kliknutiVItezovi));
+                            toi.redVitezovaPrviIgrac = nk;
+                            toi.sizeRedVitezovaPrviIgrac = toi.redVitezovaPrviIgrac.size();
+
+                        } else {
+                            for (int i = 0; i < toi.kliknutiVItezovi.size(); i++) {
+                                System.out.println("PETLJA odabrani vitezovi set red vitezova 2");
+                                toi.rukaDrugogIgraca.remove(toi.kliknutiVItezovi.get(i));
+                            }
+                            ArrayList<Karta> nk = new ArrayList<>();
+                            nk.addAll(toi.redRedVitezovaDrugiIgrac);
+                            nk.addAll(new ArrayList<>(toi.kliknutiVItezovi));
+                            toi.redRedVitezovaDrugiIgrac = nk;
+                            toi.sizeRedVitezovaDrugiIgrac = toi.redRedVitezovaDrugiIgrac.size();
+
+                        }
+                        izracunajSledecuFazu(toi);
                     }
                     toi.kliknutiVItezovi.clear();
                 }
@@ -212,35 +213,24 @@ class Klijent extends Thread {
                     System.out.println("Sistemska operacija je NAPAD.");
                     if (toi.fazaPoteza == Faza.NAPAD) {
                         if (isPrviIgracNaPotezu(toi)) {
-//                            toi.talonPrvogIgraca.getRedVitezova().remove(toi.odigranaKarta);
-//                            toi.talonPrvogIgraca.dodajURedNapad(toi.odigranaKarta);
-                            setRedNapadIOdbrana(toi.kliknutiVItezovi, toi.talonPrvogIgraca);
+                            for (int i = toi.kliknutiVItezovi.size() - 1; i >= 0 ; i--) {
+                                toi.redVitezovaPrviIgrac.remove(i);
+                            }
+                            toi.redNapadPrviIgrac = new ArrayList<>(toi.kliknutiVItezovi);
+                            toi.redOdbranaPrviIgrac = new ArrayList<>(toi.kliknutiVItezovi);
                             izracunajSledecuFazu(toi);
                             toi.igracNaPotezu = toi.drugiIgrac;
-//                            if (toi.talonDrugogIgraca.getRedVitezova().stream().filter(k -> k.vratiTipKarte().equals(TipKarte.VITEZ)).count() > 0) {
-//                                toi.fazaPoteza = Faza.ODBRANA;
-//                                toi.igracNaPotezu = toi.drugiIgrac;
-//                            } else {
-//                                toi.fazaPoteza = Faza.IZRACUNAJ_ISHOD;
-//                                // izracunaj i postavi zivot
-//                            }
                         } else {
-//                            toi.talonDrugogIgraca.getRedVitezova().remove(toi.odigranaKarta);
-//                            toi.talonDrugogIgraca.dodajURedNapad(toi.odigranaKarta);
-                            setRedNapadIOdbrana(toi.kliknutiVItezovi, toi.talonDrugogIgraca);
+                            for (int i = toi.kliknutiVItezovi.size() - 1; i >= 0 ; i--) {
+                                toi.redRedVitezovaDrugiIgrac.remove(i);
+                            }
+                            toi.redNapadDrugiIgrac = new ArrayList<>(toi.kliknutiVItezovi);
+                            toi.redOdbranaDrugiIgrac = new ArrayList<>(toi.kliknutiVItezovi);
                             izracunajSledecuFazu(toi);
                             toi.igracNaPotezu = toi.prviIgrac;
-//                            if (toi.talonPrvogIgraca.getRedVitezova().stream().filter(k -> k.vratiTipKarte().equals(TipKarte.VITEZ)).count() > 0) {
-//                                toi.fazaPoteza = Faza.ODBRANA;
-//                                toi.igracNaPotezu = toi.prviIgrac;
-//                            } else {
-//                                toi.fazaPoteza = Faza.IZRACUNAJ_ISHOD;
-//                                // izracunaj i postavi zivot
-//                            }
                         }
-
+                        toi.kliknutiVItezovi.clear();
                     }
-                    toi.kliknutiVItezovi.clear();
                 }
 //
                 if (toi.nazivOperacije.equals("odbrana")) {
@@ -248,11 +238,19 @@ class Klijent extends Thread {
                     System.out.println("Sistemska operacija je Odbrana.");
 //                    if (toi.fazaPoteza == Faza.ODBRANA) {
                     if (isPrviIgracNaPotezu(toi)) {
-                        setRedNapadIOdbrana(toi.kliknutiVItezovi, toi.talonPrvogIgraca);
+                        for (int i = toi.kliknutiVItezovi.size() - 1; i >= 0 ; i--) {
+                            toi.redVitezovaPrviIgrac.remove(i);
+                        }
+                        toi.redNapadPrviIgrac = new ArrayList<>(toi.kliknutiVItezovi);
+                        toi.redOdbranaPrviIgrac = new ArrayList<>(toi.kliknutiVItezovi);
                         toi.igracNaPotezu = toi.drugiIgrac;
                         toi.fazaPoteza = Faza.IZRACUNAJ_ISHOD;
                     } else {
-                        setRedNapadIOdbrana(toi.kliknutiVItezovi, toi.talonDrugogIgraca);
+                        for (int i = toi.kliknutiVItezovi.size() - 1; i >= 0 ; i--) {
+                            toi.redRedVitezovaDrugiIgrac.remove(i);
+                        }
+                        toi.redNapadDrugiIgrac = new ArrayList<>(toi.kliknutiVItezovi);
+                        toi.redOdbranaDrugiIgrac = new ArrayList<>(toi.kliknutiVItezovi);
                         toi.igracNaPotezu = toi.prviIgrac;
                         toi.fazaPoteza = Faza.IZRACUNAJ_ISHOD;
                     }
@@ -269,6 +267,14 @@ class Klijent extends Thread {
 
                 if (toi.nazivOperacije.equals("preskociFazu")) {
                     System.out.println("Sistemska operacija je preskociFazu " + toi.fazaPoteza);
+                    if (toi.fazaPoteza.equals(Faza.IZBACI_VITEZA)) {
+                        if (toi.prviPotez) {
+                            toi.igracNaPotezu = isPrviIgracNaPotezu(toi) ? toi.drugiIgrac : toi.prviIgrac;
+                            System.out.println("PRVI JE POTEZ i preskocio sam fazu IZBACI_VITEZA; igrac na potezu je: " + toi.igracNaPotezu.vratiKorisnickoIme());
+                            toi.fazaPoteza = Faza.DODELI_KARTU;
+                            toi.prviPotez = false;
+                        }
+                    }
                     if (toi.fazaPoteza.equals(Faza.NAPAD)) {
                         toi.igracNaPotezu = isPrviIgracNaPotezu(toi) ? toi.drugiIgrac : toi.prviIgrac;
                         System.out.println("preskocio sam fazu NAPAD i igrac na potezu je: " + toi.igracNaPotezu.vratiKorisnickoIme());
@@ -283,21 +289,13 @@ class Klijent extends Thread {
                     }
                     izracunajSledecuFazu(toi);
                 }
-
-//
-//                if (toi.nazivOperacije.equals("napadniVitezom")) {
-//                    System.out.println("Sistemska operacija je napadni vitezom.");
-//                    obavestiProtivnika(toi, "Protivnik je napao vitezom. Obavestavam drugogo igraca!");
-//                }
-//                    if (toi.nazivOperacije.equals("napuniDatotekuIzListe")) {
-//                        d.napuniDatotekuIzListe(tok);
-//                    }
-                // programski kod!!!
-//                System.out.println(toi);
-//                out.reset();
+                
                 if (Igra.getInstance().getIgraci().size() <= 1) {
                     out.writeObject(toi);
                 } else {
+                    System.out.println("Deck sizes:");
+                    System.out.println("Prvi igrac " + toi.spilPrvogIgraca.size());
+                    System.out.println("Drugi igrac " + toi.spilDrugogIgraca.size());
                     obavestiSve(toi);
                 }
             }
@@ -308,36 +306,38 @@ class Klijent extends Thread {
     }
 
     private void dodeliKartuIzSpila (List<Karta> spil, List<Karta> igracevaRuka) {
-        Karta prvaKarta = spil.get(0);
-        spil.remove(prvaKarta);
-        igracevaRuka.add(prvaKarta);
+        if (spil.size() > 0) {
+            Karta prvaKarta = spil.get(0);
+            spil.remove(prvaKarta);
+            igracevaRuka.add(prvaKarta);
+        }
     }
 
     private void izracunajSledecuFazu(TransferObjekatIgrac toi) {
-        System.out.println("toi faza poteza je " + toi.fazaPoteza.toString());
+        System.out.println("IZRACUNAJ SLEDECU FAZU metoda -- trenutna toi faza poteza je " + toi.fazaPoteza.toString());
         switch (toi.fazaPoteza) {
             case DODELI_KARTU:
-                System.out.println("DODELI_KARTU");
+                System.out.println("nova faza poteza je IZBACI_ZLATNIK");
                 toi.fazaPoteza = Faza.IZBACI_ZLATNIK;
                 break;
             case IZBACI_ZLATNIK:
-                System.out.println("IZBACI_ZLATNIK");
+                System.out.println("nova faza poteza je PLATI");
                 toi.fazaPoteza = Faza.PLATI;
                 break;
             case PLATI:
-                System.out.println("PLATI");
+                System.out.println("nova faza poteza je IZBACI_VITEZA");
                 toi.fazaPoteza = Faza.IZBACI_VITEZA;
                 break;
             case IZBACI_VITEZA:
-                System.out.println("IZBACI_VITEZA");
+                System.out.println("nova faza poteza je NAPAD");
                 toi.fazaPoteza = Faza.NAPAD;
                 break;
             case NAPAD:
-                System.out.println("NAPAD");
+                System.out.println("nova faza poteza je ODBRANA");
                 toi.fazaPoteza = Faza.ODBRANA;
                 break;
             case ODBRANA:
-                System.out.println("ODBRANA");
+                System.out.println("nova faza poteza je IZRACUNAJ_ISHOD");
                 toi.fazaPoteza = Faza.IZRACUNAJ_ISHOD;
                 break;
             case IZRACUNAJ_ISHOD:
@@ -349,120 +349,184 @@ class Klijent extends Thread {
         }
     }
 
-    private void setRedVitezova(List<Karta> ruka, List<Karta> odabraniVitezovi, Talon igracevTalon) {
-        for (int i = 0; i < odabraniVitezovi.size(); i++) {
-            for (int j = 0; j < ruka.size(); j++) {
-                if (odabraniVitezovi.get(i).getId().equals(ruka.get(j).getId())) {
-                    ruka.remove(j);
-                    igracevTalon.dodajURedVitezova(odabraniVitezovi.get(i));
-                }
-            }
-        }
-    }
-
-    private void setRedNapadIOdbrana(List<Karta> odabraniVitezovi, Talon igracevTalon) {
-        for (int i = 0; i < odabraniVitezovi.size(); i++) {
-            for (int j = 0; j < igracevTalon.getRedVitezova().size(); j++) {
-                if (odabraniVitezovi.get(i).getId().equals(igracevTalon.getRedVitezova().get(j).getId())) {
-                    igracevTalon.getRedVitezova().remove(j);
-                    igracevTalon.dodajURedNapad(odabraniVitezovi.get(i));
-                    igracevTalon.dodajURedOdbrana(odabraniVitezovi.get(i));
-                }
-            }
-        }
-    }
-
     private void izracunajIshod (TransferObjekatIgrac toi) {
         System.out.println("igrac na potezu : " + toi.igracNaPotezu.vratiKorisnickoIme());
         if (isPrviIgracNaPotezu(toi)) {
-//                            toi.talonPrvogIgraca.getRedVitezova().remove(toi.odigranaKarta);
-//                            toi.talonPrvogIgraca.dodajURedNapad(toi.odigranaKarta);
-//                            toi.talonPrvogIgraca.dodajURedOdbrana(toi.odigranaKarta);
-            setRedNapadIOdbrana(toi.talonPrvogIgraca.getRedVitezova(), toi.talonPrvogIgraca);
-//            toi.fazaPoteza = Faza.IZRACUNAJ_ISHOD;
-            int napad = 0;
-            int odbrana = 0;
+            System.out.println("Napadac je prvi igrac");
+            int napad = toi.redNapadPrviIgrac.size();
+            int odbrana = toi.redOdbranaDrugiIgrac.size();
 
-            for (int i = 0; i < toi.talonDrugogIgraca.getRedNapad().size(); i++) {
-                napad = toi.talonDrugogIgraca.getRedNapad().get(i).getNapad() + napad;
-            }
-            for (int i = 0; i < toi.talonPrvogIgraca.getRedOdbrana().size(); i++) {
-                odbrana = toi.talonPrvogIgraca.getRedOdbrana().get(i).getOdbrana() + odbrana;
-            }
-            System.out.println("size of toi.talonDrugogIgraca.getRedNapad(): " + toi.talonDrugogIgraca.getRedNapad().size());
-            System.out.println("napad: " + napad);
-            System.out.println("size of toi.talonPrvogIgraca.getRedOdbrana(): " +toi.talonPrvogIgraca.getRedOdbrana());
-            System.out.println("odbrana: " + odbrana);
-            if (odbrana == 1) {
-                toi.talonDrugogIgraca.setRedNapad(new ArrayList<>());
-            } else {
-                for(int x = toi.talonDrugogIgraca.getRedNapad().size() - 1; x >= odbrana; x--) {
-                    toi.talonDrugogIgraca.getRedNapad().remove(x);
-                }
-            }
+            if (napad != 0 || odbrana != 0) {
+                if (napad == odbrana) {
+                    System.out.println("Napad == odbrana");
 
-            if (napad == 1) {
-                toi.talonPrvogIgraca.setRedNapad(new ArrayList<>());
-                toi.talonPrvogIgraca.setRedOdbrana(new ArrayList<>());
-            } else {
-                for(int x = toi.talonPrvogIgraca.getRedNapad().size() - 1; x >= napad; x--) {
-                    toi.talonPrvogIgraca.getRedNapad().remove(x);
+                    for (int i = napad - 1; i >= 0; i--) {
+                        toi.redNapadPrviIgrac.remove(i);
+                        toi.redOdbranaPrviIgrac.remove(i);
+                        toi.redNapadDrugiIgrac.remove(i);
+                        toi.redOdbranaDrugiIgrac.remove(i);
+                    }
+                    toi.redVitezovaPrviIgrac = new ArrayList<>(toi.redNapadPrviIgrac);
+                    toi.redNapadPrviIgrac.clear();
+                    toi.redRedVitezovaDrugiIgrac = new ArrayList<>(toi.redOdbranaDrugiIgrac);
+                    toi.redOdbranaPrviIgrac.clear();
                 }
-                for(int x = toi.talonPrvogIgraca.getRedOdbrana().size() - 1; x >= napad; x--) {
-                    toi.talonPrvogIgraca.getRedOdbrana().remove(x);
+
+                if (napad > odbrana) {
+                    System.out.println("Napad > odbrana, a odbrana = 0");
+                    if (odbrana == 0) {
+                        System.out.println("Napad > odbrana, a odbrana = 0");
+                        toi.redVitezovaPrviIgrac = new ArrayList<>(toi.redNapadPrviIgrac);
+                        toi.redNapadPrviIgrac.clear();
+                        toi.redOdbranaPrviIgrac.clear();
+                    } else {
+                        System.out.println("Napad > odbrana, a odbrana NIJE 0");
+                        for (int i = odbrana - 1; i >= 0; i--) {
+                            toi.redNapadPrviIgrac.remove(i);
+                            toi.redOdbranaPrviIgrac.remove(i);
+                            toi.redNapadDrugiIgrac.remove(i);
+                            toi.redOdbranaDrugiIgrac.remove(i);
+                        }
+                        ArrayList<Karta> nk1 = new ArrayList<>();
+                        nk1.addAll(toi.redVitezovaPrviIgrac);
+                        nk1.addAll(new ArrayList<>(toi.redNapadPrviIgrac));
+                        toi.redVitezovaPrviIgrac = nk1;
+
+                        ArrayList<Karta> nk = new ArrayList<>();
+                        nk.addAll(toi.redRedVitezovaDrugiIgrac);
+                        nk.addAll(new ArrayList<>(toi.redOdbranaDrugiIgrac));
+                        toi.redRedVitezovaDrugiIgrac = nk;
+                    }
+                    toi.drugiIgrac.setZivot(toi.drugiIgrac.getZivot() - (napad - odbrana));
+                }
+
+                if (odbrana > napad) {
+                    System.out.println("Odbrana > napad");
+                    if (napad == 0) {
+                        System.out.println("Odbrana > napad, a napad = 0");
+                        toi.redRedVitezovaDrugiIgrac = new ArrayList<>(toi.redNapadDrugiIgrac);
+                        toi.redOdbranaDrugiIgrac.clear();
+                        toi.redNapadDrugiIgrac.clear();
+                    } else {
+                        System.out.println("Napad > odbrana, a odbrana NIJE 0");
+                        for (int i = napad - 1; i >= 0; i--) {
+                            toi.redNapadPrviIgrac.remove(i);
+                            toi.redOdbranaPrviIgrac.remove(i);
+                            toi.redNapadDrugiIgrac.remove(i);
+                            toi.redOdbranaDrugiIgrac.remove(i);
+                        }
+                        ArrayList<Karta> nk1 = new ArrayList<>();
+                        nk1.addAll(toi.redVitezovaPrviIgrac);
+                        nk1.addAll(new ArrayList<>(toi.redNapadPrviIgrac));
+                        toi.redVitezovaPrviIgrac = nk1;
+
+                        ArrayList<Karta> nk = new ArrayList<>();
+                        nk.addAll(toi.redRedVitezovaDrugiIgrac);
+                        nk.addAll(new ArrayList<>(toi.redOdbranaDrugiIgrac));
+                        toi.redRedVitezovaDrugiIgrac = nk;
+                    }
                 }
             }
-            System.out.println("nakon napada: " + toi.talonDrugogIgraca.getRedNapad().size());
-            System.out.println("nakon odbrane: " + toi.talonPrvogIgraca.getRedOdbrana().size());
 
             toi.igracNaPotezu = toi.drugiIgrac;
         } else {
-//                            toi.talonDrugogIgraca.getRedVitezova().remove(toi.odigranaKarta);
-////                            toi.talonDrugogIgraca.dodajURedNapad(toi.odigranaKarta);
-////                            toi.talonDrugogIgraca.dodajURedOdbrana(toi.odigranaKarta);
-            setRedNapadIOdbrana(toi.talonDrugogIgraca.getRedVitezova(), toi.talonDrugogIgraca);
-//            toi.fazaPoteza = Faza.IZRACUNAJ_ISHOD;
-            int napad = 0;
-            for (int i = 0; i < toi.talonPrvogIgraca.getRedNapad().size(); i++) {
-                napad = toi.talonPrvogIgraca.getRedNapad().get(i).getNapad() + napad;
-            }
-            int odbrana = 0;
-            for (int i = 0; i < toi.talonDrugogIgraca.getRedOdbrana().size(); i++) {
-                odbrana = toi.talonDrugogIgraca.getRedOdbrana().get(i).getOdbrana() + odbrana;
-            }
-            System.out.println("size of toi.talonPrvogIgraca.getRedNapad(): " + toi.talonPrvogIgraca.getRedNapad().size());
-            System.out.println("napad: " + napad);
-            System.out.println("size of toi.talonDrugogIgraca.getRedOdbrana(): " +toi.talonDrugogIgraca.getRedOdbrana());
-            System.out.println("odbrana: " + odbrana);
-            if (odbrana == 1) {
-                toi.talonPrvogIgraca.setRedNapad(new ArrayList<>());
-            } else {
-                for(int x = toi.talonPrvogIgraca.getRedNapad().size() - 1; x >= odbrana; x--) {
-                    toi.talonPrvogIgraca.getRedNapad().remove(x);
-                }
-            }
+            System.out.println("Napadac je drugi igrac");
+            int napad = toi.redNapadDrugiIgrac.size();
+            int odbrana = toi.redOdbranaPrviIgrac.size();
 
-            if (napad == 1) {
-                toi.talonDrugogIgraca.setRedNapad(new ArrayList<>());
-                toi.talonDrugogIgraca.setRedOdbrana(new ArrayList<>());
-            } else {
-                for(int x = toi.talonPrvogIgraca.getRedNapad().size() - 1; x >= napad; x--) {
-                    toi.talonDrugogIgraca.getRedNapad().remove(x);
+            if (napad != 0 || odbrana != 0) {
+                if (napad == odbrana) {
+                    System.out.println("Napad == odbrana");
+                    for (int i = napad - 1; i >= 0; i--) {
+                        toi.redNapadPrviIgrac.remove(i);
+                        toi.redOdbranaPrviIgrac.remove(i);
+                        toi.redNapadDrugiIgrac.remove(i);
+                        toi.redOdbranaDrugiIgrac.remove(i);
+                    }
+                    ArrayList<Karta> nk1 = new ArrayList<>();
+                    nk1.addAll(toi.redVitezovaPrviIgrac);
+                    nk1.addAll(new ArrayList<>(toi.redOdbranaPrviIgrac));
+                    toi.redVitezovaPrviIgrac = nk1;
+
+                    ArrayList<Karta> nk = new ArrayList<>();
+                    nk.addAll(toi.redRedVitezovaDrugiIgrac);
+                    nk.addAll(new ArrayList<>(toi.redNapadDrugiIgrac));
+                    toi.redRedVitezovaDrugiIgrac = nk;
                 }
-                for(int x = toi.talonPrvogIgraca.getRedOdbrana().size() - 1; x >= napad; x--) {
-                    toi.talonDrugogIgraca.getRedOdbrana().remove(x);
+
+                if (napad > odbrana) {
+                    System.out.println("Napad > odbrana");
+
+                    if (odbrana == 0) {
+                        System.out.println("Napad > odbrana, a odbrana = 0");
+
+                        toi.redRedVitezovaDrugiIgrac = new ArrayList<>(toi.redNapadDrugiIgrac);
+                        toi.redOdbranaDrugiIgrac.clear();
+                        toi.redNapadDrugiIgrac.clear();
+                    } else {
+                        System.out.println("Napad > odbrana, a odbrana NIJE 0");
+
+                        for (int i = odbrana - 1; i >= 0; i--) {
+                            toi.redNapadPrviIgrac.remove(i);
+                            toi.redOdbranaPrviIgrac.remove(i);
+                            toi.redNapadDrugiIgrac.remove(i);
+                            toi.redOdbranaDrugiIgrac.remove(i);
+                        }
+                        ArrayList<Karta> nk1 = new ArrayList<>();
+                        nk1.addAll(toi.redVitezovaPrviIgrac);
+                        nk1.addAll(new ArrayList<>(toi.redOdbranaPrviIgrac));
+                        toi.redVitezovaPrviIgrac = nk1;
+
+                        ArrayList<Karta> nk = new ArrayList<>();
+                        nk.addAll(toi.redRedVitezovaDrugiIgrac);
+                        nk.addAll(new ArrayList<>(toi.redNapadDrugiIgrac));
+                        toi.redRedVitezovaDrugiIgrac = nk;
+                    }
+                    toi.prviIgrac.setZivot(toi.prviIgrac.getZivot() - (napad - odbrana));
+                }
+
+                if (odbrana > napad) {
+                    System.out.println("Odbrana > napad");
+
+                    if (napad == 0) {
+                        System.out.println("Odbrana > napad, a napad = 0");
+
+                        toi.redVitezovaPrviIgrac = new ArrayList<>(toi.redNapadPrviIgrac);
+                        toi.redOdbranaPrviIgrac.clear();
+                        toi.redNapadPrviIgrac.clear();
+                    } else {
+                        System.out.println("Odbrana > napad, a napad NIJE 0");
+
+                        for (int i = napad - 1; i >= napad; i--) {
+                            toi.redNapadPrviIgrac.remove(i);
+                            toi.redOdbranaPrviIgrac.remove(i);
+                            toi.redNapadDrugiIgrac.remove(i);
+                            toi.redOdbranaDrugiIgrac.remove(i);
+                        }
+                        ArrayList<Karta> nk1 = new ArrayList<>();
+                        nk1.addAll(toi.redVitezovaPrviIgrac);
+                        nk1.addAll(new ArrayList<>(toi.redOdbranaPrviIgrac));
+                        toi.redVitezovaPrviIgrac = nk1;
+
+                        ArrayList<Karta> nk = new ArrayList<>();
+                        nk.addAll(toi.redRedVitezovaDrugiIgrac);
+                        nk.addAll(new ArrayList<>(toi.redNapadDrugiIgrac));
+                        toi.redRedVitezovaDrugiIgrac = nk;
+                    }
                 }
             }
-            System.out.println("nakon napada: " + toi.talonPrvogIgraca.getRedNapad().size());
-            System.out.println("nakon odbrane: " + toi.talonDrugogIgraca.getRedOdbrana().size());
             toi.igracNaPotezu = toi.prviIgrac;
         }
-        toi.fazaPoteza = Faza.DODELI_KARTU;
-//        if (isPrviIgracNaPotezu(toi)) {
-//            dodeliKartuIzSpila(toi.spilPrvogIgraca, toi.rukaPrvogIgraca);
-//        } else {
-//            dodeliKartuIzSpila(toi.spilDrugogIgraca, toi.rukaDrugogIgraca);
-//        }
+
+        toi.redNapadPrviIgrac.clear();
+        toi.redOdbranaPrviIgrac.clear();
+        toi.redNapadDrugiIgrac.clear();
+        toi.redOdbranaDrugiIgrac.clear();
+
+        if (toi.prviIgrac.getZivot() == 0 || toi.drugiIgrac.getZivot() == 0) {
+            toi.poruka = "KRAJ IGRE";
+        }
+        izracunajSledecuFazu(toi);
     }
 
     private void obavestiSve(TransferObjekatIgrac toi) throws IOException {

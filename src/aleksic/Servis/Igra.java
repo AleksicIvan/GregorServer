@@ -49,7 +49,7 @@ public class Igra implements Serializable {
     public void init() {
         for (Integer i = 0; i < igraci.size(); i++) {
             Igrac trenutniIgrac = igraci.get(i);
-            trenutniIgrac.setZivot(20);
+            trenutniIgrac.setZivot(10);
             Spil spil = new Spil();
             List<Karta> promesaniSpil = spil.promesajSpil();
             List<Karta> podeljenaRuka = spil.podeliRuku(promesaniSpil);
@@ -57,7 +57,7 @@ public class Igra implements Serializable {
             trenutniIgrac.postaviRuku(podeljenaRuka);
             System.out.println("Igrac: " + trenutniIgrac.vratiKorisnickoIme());
             System.out.println(trenutniIgrac.vratiKorisnickoIme()  + " zivot: " + trenutniIgrac.getZivot());
-            System.out.println(trenutniIgrac.vratiKorisnickoIme()  + " spil: " + trenutniIgrac.vratiSpil());
+            System.out.println(trenutniIgrac.vratiKorisnickoIme()  + " spil: " + trenutniIgrac.vratiSpil().size());
             System.out.println(trenutniIgrac.vratiKorisnickoIme() + " ruka: " + trenutniIgrac.vratiRuku());
             System.out.println(trenutniIgrac.vratiKorisnickoIme() + " talon: " + trenutniIgrac.vratiTalon());
         }
