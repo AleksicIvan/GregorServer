@@ -1,5 +1,7 @@
 package aleksic.Server;
 
+import aleksic.BrokerBazePodataka.BrokerBazePodataka;
+import aleksic.BrokerBazePodataka.BrokerBazePodataka1;
 import aleksic.Models.*;
 import aleksic.Servis.Faza;
 import aleksic.Servis.Igra;
@@ -37,17 +39,13 @@ class Klijent extends Thread {
     ObjectOutputStream out;
     ObjectInputStream in;
     int iKlijent;
-    Lista l;
-    Datoteka d;
+    static public BrokerBazePodataka bbp = new BrokerBazePodataka1();
 
     public Klijent(Socket soketS1, int iKlijent) {
         soketS = soketS1;
         this.iKlijent = iKlijent;
+        bbp.makeConnection();
         System.out.println("Klijent broj " + iKlijent + " je povezan!");
-        l = new Lista();
-        // programski kod!!!
-        d = new Datoteka(l);
-//        komunikacijaSaKlijentom();
         start();
     }
 
@@ -71,50 +69,45 @@ class Klijent extends Thread {
             while (true) {
                 toi = (TransferObjekatIgrac) in.readObject();
 
+
+                if (toi.nazivOperacije.equals("novaIgra")) {
+                    System.out.println("Sistemska operacija je novaIgra");
+                    Igra.reset();
+                    Igra.getInstance().dodajIgraca(toi.prviIgrac);
+                    Igra.getInstance().dodajIgraca(toi.drugiIgrac);
+                    Igra.getInstance().init();
+                    inicicijalizacijaToi(toi);
+                    toi.poruka = "Nova igra je dodata do toi";
+                }
+
+
                 if (toi.nazivOperacije.equals("init")) {
                     System.out.println("Sistemska operacija je init");
                     toi.igra = Igra.getInstance();
-                    System.out.println("Igra je dodata do toi");
+                    toi.poruka = "Igra je dodata do toi";
                 }
 
                 if (toi.nazivOperacije.equals("kreirajIgraca")) {
-//                    l.kreirajIgraca(toi);
-                    Igra.getInstance().dodajIgraca(toi.igr);
-                    toi.brojigraca = 1;
+                    Igrac igrac = (Igrac) bbp.findRecord(toi.igr);
+                    if (igrac != null) {
+                        Igra.getInstance().dodajIgraca(igrac);
+                        toi.brojigraca = 1;
 
-                    if (Igra.getInstance().getIgraci().size() == 1) {
-                        System.out.println("Sistemska operacija je kreirajIgraca - ima jedan igrac");
-                        toi.igra = Igra.getInstance();
-                        toi.poruka = "Prvi igrac je registrovan. Sistem ceka drugog igraca!!!";
+                        if (Igra.getInstance().getIgraci().size() == 1) {
+                            System.out.println("Sistemska operacija je kreirajIgraca - ima jedan igrac");
+                            toi.igra = Igra.getInstance();
+                            toi.poruka = "Prvi igrac je registrovan. Sistem ceka drugog igraca!!!";
+                        }
+
+                        if (Igra.getInstance().getIgraci().size() == 2) {
+                            System.out.println("Sistemska operacija je kreirajIgraca - oba igraca su registrovana");
+                            Igra.getInstance().init();
+                            inicicijalizacijaToi(toi);
+                            toi.poruka = "Sistem je pronasao protivnika. Obavestavam zadnjeg ulogovanog!";
+                        }
+                    } else {
+                        toi.poruka = "Greska! Igrac sa unesenim vrednostima ne postoji. Probajte ponovo";
                     }
-
-                    if (Igra.getInstance().getIgraci().size() == 2) {
-                        System.out.println("Sistemska operacija je kreirajIgraca - oba igraca su registrovana");
-                        Igra.getInstance().init();
-                        toi.igra = Igra.getInstance();
-                        toi.prviIgrac = Igra.getInstance().getIgraci().get(0);
-                        toi.spilPrvogIgraca = Igra.getInstance().getIgraci().get(0).vratiSpil();
-                        toi.talonPrvogIgraca = Igra.getInstance().getIgraci().get(0).vratiTalon();
-                        toi.rukaPrvogIgraca = Igra.getInstance().getIgraci().get(0).vratiRuku();
-                        toi.drugiIgrac = Igra.getInstance().getIgraci().get(1);
-                        toi.spilDrugogIgraca = Igra.getInstance().getIgraci().get(1).vratiSpil();
-                        toi.talonDrugogIgraca = Igra.getInstance().getIgraci().get(1).vratiTalon();
-                        toi.rukaDrugogIgraca = Igra.getInstance().getIgraci().get(1).vratiRuku();
-                        toi.igracNaPotezu = Igra.getInstance().vratiIgracaNaPotezu();
-                        toi.brojigraca = 2;
-                        toi.brojPoteza = 0;
-                        incrementBrojPoteza(toi);
-                        toi.fazaPoteza = Faza.IZBACI_ZLATNIK;
-                        toi.prviPotez = true;
-                        toi.redVitezovaPrviIgrac = new ArrayList<Karta>();
-                        toi.redNapadPrviIgrac = new ArrayList<Karta>();
-                        toi.redOdbranaPrviIgrac = new ArrayList<Karta>();
-                        toi.redRedVitezovaDrugiIgrac = new ArrayList<Karta>();
-                        toi.redNapadDrugiIgrac = new ArrayList<Karta>();
-                        toi.redOdbranaDrugiIgrac = new ArrayList<Karta>();
-                        toi.poruka = "Sistem je pronasao protivnika. Obavestavam zadnjeg ulogovanog!";
-                    }
-
                 }
 
                 if (toi.nazivOperacije.equals("dodeliKartu")) {
@@ -134,9 +127,11 @@ class Klijent extends Thread {
                         if (isPrviIgracNaPotezu(toi)) {
                             toi.rukaPrvogIgraca.remove(toi.odigranaKarta);
                             toi.talonPrvogIgraca.dodajURedZlatnika(toi.odigranaKarta);
+                            toi.redZlatnikaPrviIgrac.add(toi.odigranaKarta);
                         } else {
                             toi.rukaDrugogIgraca.remove(toi.odigranaKarta);
                             toi.talonDrugogIgraca.dodajURedZlatnika(toi.odigranaKarta);
+                            toi.redZlatnikaDrugiIgrac.add(toi.odigranaKarta);
                         }
                         izracunajSledecuFazu(toi);
                     }
@@ -262,6 +257,7 @@ class Klijent extends Thread {
                 if (toi.nazivOperacije.equals("izracunajIshod")) {
                     // TODO omoguci odbranu sa vise viteza koliko ih ima u redu vitezova
                     System.out.println("Sistemska operacija je izracunajIshod.");
+                    incrementBrojPoteza(toi);
                     izracunajIshod(toi);
                 }
 
@@ -303,6 +299,33 @@ class Klijent extends Thread {
             e.printStackTrace();
             System.out.println(e);
         }
+    }
+
+    private void inicicijalizacijaToi(TransferObjekatIgrac toi) {
+        toi.igra = Igra.getInstance();
+        toi.prviIgrac = Igra.getInstance().getIgraci().get(0);
+        toi.spilPrvogIgraca = Igra.getInstance().getIgraci().get(0).vratiSpil();
+        toi.talonPrvogIgraca = Igra.getInstance().getIgraci().get(0).vratiTalon();
+        toi.rukaPrvogIgraca = Igra.getInstance().getIgraci().get(0).vratiRuku();
+        toi.drugiIgrac = Igra.getInstance().getIgraci().get(1);
+        toi.spilDrugogIgraca = Igra.getInstance().getIgraci().get(1).vratiSpil();
+        toi.talonDrugogIgraca = Igra.getInstance().getIgraci().get(1).vratiTalon();
+        toi.rukaDrugogIgraca = Igra.getInstance().getIgraci().get(1).vratiRuku();
+        toi.igracNaPotezu = Igra.getInstance().vratiIgracaNaPotezu();
+        toi.brojigraca = 2;
+        toi.brojPoteza = 0;
+        toi.odigranaKarta = null;
+        incrementBrojPoteza(toi);
+        toi.fazaPoteza = Faza.IZBACI_ZLATNIK;
+        toi.prviPotez = true;
+        toi.redVitezovaPrviIgrac = new ArrayList<Karta>();
+        toi.redNapadPrviIgrac = new ArrayList<Karta>();
+        toi.redOdbranaPrviIgrac = new ArrayList<Karta>();
+        toi.redZlatnikaPrviIgrac = new ArrayList<Karta>();
+        toi.redRedVitezovaDrugiIgrac = new ArrayList<Karta>();
+        toi.redNapadDrugiIgrac = new ArrayList<Karta>();
+        toi.redOdbranaDrugiIgrac = new ArrayList<Karta>();
+        toi.redZlatnikaDrugiIgrac = new ArrayList<Karta>();
     }
 
     private void dodeliKartuIzSpila (List<Karta> spil, List<Karta> igracevaRuka) {
@@ -523,10 +546,12 @@ class Klijent extends Thread {
         toi.redNapadDrugiIgrac.clear();
         toi.redOdbranaDrugiIgrac.clear();
 
-        if (toi.prviIgrac.getZivot() == 0 || toi.drugiIgrac.getZivot() == 0) {
+        if (toi.prviIgrac.getZivot() <= 0 || toi.drugiIgrac.getZivot() <= 0) {
+            Igra.getInstance().setKrajIgre(true);
             toi.poruka = "KRAJ IGRE";
+        } else {
+            izracunajSledecuFazu(toi);
         }
-        izracunajSledecuFazu(toi);
     }
 
     private void obavestiSve(TransferObjekatIgrac toi) throws IOException {

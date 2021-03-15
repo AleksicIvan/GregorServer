@@ -28,6 +28,10 @@ public class Igra implements Serializable {
         return instance;
     }
 
+    public static void reset() {
+        instance = null;
+    }
+
     public Igra(List<Igrac> igraci, Date datumIgre) {
         this.igraci = igraci;
         this.datumIgre = datumIgre;
