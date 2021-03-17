@@ -139,4 +139,9 @@ public class Igrac extends GeneralDObject implements Serializable {
     public int getPrimaryKey() {
         return 0;
     }
+
+    @Override
+    public String getInsertAtributes() {
+        return null;
+    }
 }

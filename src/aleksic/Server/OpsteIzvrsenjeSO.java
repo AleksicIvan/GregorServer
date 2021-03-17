@@ -16,18 +16,16 @@ public abstract class OpsteIzvrsenjeSO {
     int currentRecord = -1;
     GeneralDObject gdo;
     
-    synchronized public boolean opsteIzvrsenjeSO()
-      {  bbp.makeConnection();
-         boolean signal = izvrsiSO();
-        if (signal==true) 
-          bbp.commitTransation();
+    synchronized public boolean opsteIzvrsenjeSO() {
+        bbp.makeConnection();
+        boolean signal = izvrsiSO();
+        if (signal==true) bbp.commitTransation();
         else
-         bbp.rollbackTransation();
-        bbp.closeConnection();
-        return signal;
+            bbp.rollbackTransation();
+            bbp.closeConnection();
+            return signal;
       }    
        
      
     abstract public boolean izvrsiSO();
-    
 }

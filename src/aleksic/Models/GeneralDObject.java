@@ -14,4 +14,6 @@ public abstract class GeneralDObject implements Serializable
   abstract public String getNameByColumn(int column);//{return "";}
   abstract public GeneralDObject getNewRecord(ResultSet rs) throws SQLException; //{return null;}
   abstract public int getPrimaryKey();
+
+  public abstract String getInsertAtributes();
 }

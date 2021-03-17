@@ -44,7 +44,8 @@ public class BrokerBazePodataka1 extends BrokerBazePodataka {
 
     @Override
     public boolean insertRecord(GeneralDObject odo) {
-        String upit = "INSERT INTO " + odo.getClassName() + " VALUES (" + odo.getAtrValue() + ")";
+        String upit = "INSERT INTO " + odo.getClassName() + "(" + odo.getInsertAtributes() + ")"  + " VALUES (" + odo.getAtrValue() + ")";
+        System.out.println("Upit iz insertRecord: " + upit);
         return executeUpdate(upit);
     }
 

@@ -44,7 +44,6 @@ class Klijent extends Thread {
     public Klijent(Socket soketS1, int iKlijent) {
         soketS = soketS1;
         this.iKlijent = iKlijent;
-        bbp.makeConnection();
         System.out.println("Klijent broj " + iKlijent + " je povezan!");
         start();
     }
@@ -69,6 +68,13 @@ class Klijent extends Thread {
             while (true) {
                 toi = (TransferObjekatIgrac) in.readObject();
 
+                if (toi.nazivOperacije.equals("odustanak")) {
+                    try {
+                        soketS.close();
+                        System.out.println("The server is shut down!");
+                    } catch (IOException e) { /* failed */ }
+                }
+
 
                 if (toi.nazivOperacije.equals("novaIgra")) {
                     System.out.println("Sistemska operacija je novaIgra");
@@ -88,7 +94,7 @@ class Klijent extends Thread {
                 }
 
                 if (toi.nazivOperacije.equals("kreirajIgraca")) {
-                    Igrac igrac = (Igrac) bbp.findRecord(toi.igr);
+                    Igrac igrac = nadjiIgraca(toi).igr;
                     if (igrac != null) {
                         Igra.getInstance().dodajIgraca(igrac);
                         toi.brojigraca = 1;
@@ -102,6 +108,7 @@ class Klijent extends Thread {
                         if (Igra.getInstance().getIgraci().size() == 2) {
                             System.out.println("Sistemska operacija je kreirajIgraca - oba igraca su registrovana");
                             Igra.getInstance().init();
+                            kreirajIgru(toi);
                             inicicijalizacijaToi(toi);
                             toi.poruka = "Sistem je pronasao protivnika. Obavestavam zadnjeg ulogovanog!";
                         }
@@ -287,6 +294,7 @@ class Klijent extends Thread {
                 }
                 
                 if (Igra.getInstance().getIgraci().size() <= 1) {
+                    if (soketS.isClosed()) return;
                     out.writeObject(toi);
                 } else {
                     System.out.println("Deck sizes:");
@@ -298,8 +306,32 @@ class Klijent extends Thread {
         } catch (Exception e) {
             e.printStackTrace();
             System.out.println(e);
+            try {
+                soketS.close();
+            } catch (IOException err) {
+                e.printStackTrace(System.err);
+            }
         }
     }
+
+    public TransferObjekatIgrac nadjiIgraca(TransferObjekatIgrac toi) {
+        System.out.println("Usao u nadji igraca.");
+        new KNadjiIgraca().nadjiIgraca(toi);
+        return toi;
+    }
+
+    public TransferObjekatIgrac promeniIgraca(TransferObjekatIgrac toi) {
+        // Uneti programski kod
+        new KPromeniIgraca().promeniIgraca(toi);
+        return toi;
+    }
+
+    public TransferObjekatIgrac kreirajIgru(TransferObjekatIgrac toi)
+    {
+        new KKreirajIgru().kreirajIgru(toi);
+        return toi;
+    }
+
 
     private void inicicijalizacijaToi(TransferObjekatIgrac toi) {
         toi.igra = Igra.getInstance();
