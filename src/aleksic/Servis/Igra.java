@@ -52,11 +52,7 @@ public class Igra extends GeneralDObject implements Serializable {
     }
 
     public void dodajIgraca (Igrac igrac) {
-
         igraci.add(igrac);
-//        if (igraci.size() == 2) {
-//            init(igraci);
-//        }
     }
 
     public void init() {
@@ -76,9 +72,14 @@ public class Igra extends GeneralDObject implements Serializable {
         }
         setIgracNaPotezu(odrediIgracaNaPrvomPotezu(igraci.get(0), igraci.get(1)));
         postaviFazuPoteza(Faza.IZBACI_ZLATNIK);
-//        while (isKrajIgre() != true) {
-//            odigrajPotez();
-//        }
+    }
+
+    public void setIdPobednika (int id) {
+        idPobednika = id;
+    }
+
+    public int getIdPobednika () {
+        return idPobednika;
     }
 
     public Igrac odrediIgracaNaPrvomPotezu (Igrac igrac1, Igrac igrac2) {

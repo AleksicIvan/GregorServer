@@ -264,7 +264,6 @@ class Klijent extends Thread {
                 if (toi.nazivOperacije.equals("izracunajIshod")) {
                     // TODO omoguci odbranu sa vise viteza koliko ih ima u redu vitezova
                     System.out.println("Sistemska operacija je izracunajIshod.");
-                    incrementBrojPoteza(toi);
                     izracunajIshod(toi);
                 }
 
@@ -290,7 +289,9 @@ class Klijent extends Thread {
                         toi.igracNaPotezu = isPrviIgracNaPotezu(toi) ? toi.drugiIgrac : toi.prviIgrac;
                         System.out.println("preskocio sam fazu IZRACUNAJ_ISHOD i igrac na potezu je: " + toi.igracNaPotezu.vratiKorisnickoIme());
                     }
-                    izracunajSledecuFazu(toi);
+                    if (!toi.prviPotez) {
+                        izracunajSledecuFazu(toi);
+                    }
                 }
                 
                 if (Igra.getInstance().getIgraci().size() <= 1) {
@@ -300,6 +301,8 @@ class Klijent extends Thread {
                     System.out.println("Deck sizes:");
                     System.out.println("Prvi igrac " + toi.spilPrvogIgraca.size());
                     System.out.println("Drugi igrac " + toi.spilDrugogIgraca.size());
+                    System.out.println("Pobednik? " + Igra.getInstance().getIdPobednika());
+                    System.out.println("broj poteza? " + toi.brojPoteza);
                     obavestiSve(toi);
                 }
             }
@@ -372,6 +375,8 @@ class Klijent extends Thread {
         System.out.println("IZRACUNAJ SLEDECU FAZU metoda -- trenutna toi faza poteza je " + toi.fazaPoteza.toString());
         switch (toi.fazaPoteza) {
             case DODELI_KARTU:
+                System.out.println("Trenutna faza je DODELI_KARTU, povecavam brojPoteza za 1");
+                incrementBrojPoteza(toi);
                 System.out.println("nova faza poteza je IZBACI_ZLATNIK");
                 toi.fazaPoteza = Faza.IZBACI_ZLATNIK;
                 break;
@@ -580,6 +585,13 @@ class Klijent extends Thread {
 
         if (toi.prviIgrac.getZivot() <= 0 || toi.drugiIgrac.getZivot() <= 0) {
             Igra.getInstance().setKrajIgre(true);
+            Igra.getInstance().setIdPobednika(
+                    toi.prviIgrac.getZivot() > 0
+                        ? toi.prviIgrac.getId()
+                            : toi.drugiIgrac.getId()
+            );
+            // TODO: Pozovi update Igre u bazi (update broj poteza i id pobednika)
+            // TODO: Pozovi update Igraca u bazi (update za broj odigranih paritija i broj pobeda)
             toi.poruka = "KRAJ IGRE";
         } else {
             izracunajSledecuFazu(toi);
