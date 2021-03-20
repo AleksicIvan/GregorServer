@@ -1,4 +1,4 @@
-package aleksic.Models;
+package aleksic.DomenskiObjekat;
 
 public enum TipKarte {
     VITEZ,

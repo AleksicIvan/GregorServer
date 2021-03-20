@@ -1,7 +1,7 @@
 package aleksic.BrokerBazePodataka;
 
 
-import aleksic.Models.GeneralDObject;
+import aleksic.DomenskiObjekat.GeneralDObject;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import java.util.List;

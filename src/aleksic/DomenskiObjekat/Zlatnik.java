@@ -1,4 +1,4 @@
-package aleksic.Models;
+package aleksic.DomenskiObjekat;
 
 public class Zlatnik extends Karta {
     private static final long serialVersionUID = 6529685098267757690L;

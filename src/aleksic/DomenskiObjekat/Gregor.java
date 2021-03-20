@@ -1,4 +1,4 @@
-package aleksic.Models;
+package aleksic.DomenskiObjekat;
 
 public class Gregor extends Karta {
     public Gregor(Integer id, Integer napad, Integer odbrana, Integer cena, TipKarte tip, boolean iskoriscena) {

@@ -10,9 +10,7 @@
 package aleksic.BrokerBazePodataka;
 
 
-import aleksic.Models.GeneralDObject;
-import aleksic.BrokerBazePodataka.BrokerBazePodataka;
-import aleksic.Models.GeneralDObject;
+import aleksic.DomenskiObjekat.GeneralDObject;
 
 import java.sql.*;
 import java.util.concurrent.atomic.AtomicInteger;

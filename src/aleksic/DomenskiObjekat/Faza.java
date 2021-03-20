@@ -1,4 +1,4 @@
-package aleksic.Servis;
+package aleksic.DomenskiObjekat;
 
 import java.io.Serializable;
 

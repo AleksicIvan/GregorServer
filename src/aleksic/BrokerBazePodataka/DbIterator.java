@@ -1,8 +1,6 @@
 package aleksic.BrokerBazePodataka;
 
-import aleksic.BrokerBazePodataka.BrokerBazePodataka1;
-import aleksic.Models.GeneralDObject;
-import aleksic.BrokerBazePodataka.BrokerBazePodataka;
+import aleksic.DomenskiObjekat.GeneralDObject;
 
 import java.io.Serializable;
 

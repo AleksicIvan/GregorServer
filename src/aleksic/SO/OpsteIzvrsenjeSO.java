@@ -1,8 +1,8 @@
-package aleksic.Server;
+package aleksic.SO;
 
 import aleksic.BrokerBazePodataka.BrokerBazePodataka;
 import aleksic.BrokerBazePodataka.BrokerBazePodataka1;
-import aleksic.Models.GeneralDObject;
+import aleksic.DomenskiObjekat.GeneralDObject;
 
 
 

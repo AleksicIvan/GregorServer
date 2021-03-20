@@ -2,9 +2,12 @@ package aleksic.Server;
 
 import aleksic.BrokerBazePodataka.BrokerBazePodataka;
 import aleksic.BrokerBazePodataka.BrokerBazePodataka1;
-import aleksic.Models.*;
-import aleksic.Servis.Faza;
-import aleksic.Servis.Igra;
+import aleksic.DomenskiObjekat.*;
+import aleksic.DomenskiObjekat.Faza;
+import aleksic.DomenskiObjekat.Igra;
+import aleksic.SO.KKreirajIgru;
+import aleksic.SO.KNadjiIgraca;
+import aleksic.SO.KPromeniIgraca;
 import aleksic.TransferObjekat.TransferObjekatIgrac;
 
 import java.io.IOException;
@@ -599,6 +602,9 @@ class Klijent extends Thread {
     }
 
     private void obavestiSve(TransferObjekatIgrac toi) throws IOException {
+        if (soketS.isClosed()) {
+            return;
+        }
         for (Klijent k : KontrolerServer.lkl) {
             System.out.println("obavestavam klijenta " + k.iKlijent);
             k.out.writeObject(toi);

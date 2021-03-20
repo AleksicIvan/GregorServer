@@ -1,6 +1,6 @@
-package aleksic.Server;
+package aleksic.SO;
 
-import aleksic.Models.Igrac;
+import aleksic.DomenskiObjekat.Igrac;
 import aleksic.TransferObjekat.TransferObjekatIgrac;
 
 

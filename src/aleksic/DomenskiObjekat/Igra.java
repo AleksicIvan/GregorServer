@@ -1,6 +1,4 @@
-package aleksic.Servis;
-
-import aleksic.Models.*;
+package aleksic.DomenskiObjekat;
 
 import java.io.Serializable;
 import java.sql.ResultSet;
@@ -8,8 +6,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Scanner;
-import java.util.function.Predicate;
 
 public class Igra extends GeneralDObject implements Serializable {
     private int id;
