@@ -8,7 +8,7 @@ import aleksic.TransferObjekat.TransferObjekatIgrac;
  *
  * @author Sinisa
  */
-public class KPromeniIgraca extends OpsteIzvrsenjeSO {
+public class PromeniIgraca extends OpsteIzvrsenjeSO {
     TransferObjekatIgrac toi;
 
 
