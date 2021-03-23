@@ -1,7 +1,7 @@
 package aleksic.SO;
 
 import aleksic.DomenskiObjekat.Igra;
-import aleksic.TransferObjekat.TransferObjekatIgrac;
+import aleksic.TransferObjekat.TransferObjekatIgra;
 
 
 
@@ -10,10 +10,10 @@ import aleksic.TransferObjekat.TransferObjekatIgrac;
  * @author Sinisa
  */
 public class KreirajIgru extends OpsteIzvrsenjeSO {
-    TransferObjekatIgrac toi;
+    TransferObjekatIgra toi;
 
 
-    public void kreirajIgru(TransferObjekatIgrac toi) {
+    public void kreirajIgru(TransferObjekatIgra toi) {
         this.toi = toi;
         opsteIzvrsenjeSO();
     }

@@ -7,7 +7,7 @@ import aleksic.DomenskiObjekat.Igra;
 import java.io.Serializable;
 import java.util.List;
 
-public class TransferObjekatIgrac implements Serializable {
+public class TransferObjekatIgra implements Serializable {
     private static final long serialVersionUID = 6529685098267757690L;
     public Igrac igr;
     public Igra igra;

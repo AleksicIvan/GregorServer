@@ -8,7 +8,7 @@ import aleksic.DomenskiObjekat.Igra;
 import aleksic.SO.KreirajIgru;
 import aleksic.SO.NadjiIgraca;
 import aleksic.SO.PromeniIgraca;
-import aleksic.TransferObjekat.TransferObjekatIgrac;
+import aleksic.TransferObjekat.TransferObjekatIgra;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -51,11 +51,11 @@ class Klijent extends Thread {
         start();
     }
 
-    private boolean isPrviIgracNaPotezu (TransferObjekatIgrac toi) {
+    private boolean isPrviIgracNaPotezu (TransferObjekatIgra toi) {
         return toi.igracNaPotezu.vratiKorisnickoIme().equals(toi.prviIgrac.vratiKorisnickoIme());
     }
 
-    private void incrementBrojPoteza (TransferObjekatIgrac toi) {
+    private void incrementBrojPoteza (TransferObjekatIgra toi) {
         toi.brojPoteza++;
     }
 
@@ -65,11 +65,11 @@ class Klijent extends Thread {
             String signal = "";
             out = new ObjectOutputStream(soketS.getOutputStream());
             in = new ObjectInputStream(soketS.getInputStream());
-            TransferObjekatIgrac toi = null;
+            TransferObjekatIgra toi = null;
 
 
             while (true) {
-                toi = (TransferObjekatIgrac) in.readObject();
+                toi = (TransferObjekatIgra) in.readObject();
 
                 if (toi.nazivOperacije.equals("odustanak")) {
                     onOdustanak();
@@ -137,7 +137,7 @@ class Klijent extends Thread {
         }
     }
 
-    private void onPreskociFazu(TransferObjekatIgrac toi) {
+    private void onPreskociFazu(TransferObjekatIgra toi) {
         System.out.println("Sistemska operacija je preskociFazu " + toi.fazaPoteza);
         if (toi.fazaPoteza.equals(Faza.IZBACI_VITEZA)) {
             if (toi.prviPotez) {
@@ -164,7 +164,7 @@ class Klijent extends Thread {
         }
     }
 
-    private void onOdbrana(TransferObjekatIgrac toi) {
+    private void onOdbrana(TransferObjekatIgra toi) {
         System.out.println("Sistemska operacija je Odbrana.");
         if (isPrviIgracNaPotezu(toi)) {
             for (int i = toi.kliknutiVItezovi.size() - 1; i >= 0 ; i--) {
@@ -186,7 +186,7 @@ class Klijent extends Thread {
         toi.kliknutiVItezovi.clear();
     }
 
-    private void onNapad(TransferObjekatIgrac toi) {
+    private void onNapad(TransferObjekatIgra toi) {
         System.out.println("Sistemska operacija je NAPAD.");
         if (toi.fazaPoteza == Faza.NAPAD) {
             if (isPrviIgracNaPotezu(toi)) {
@@ -210,7 +210,7 @@ class Klijent extends Thread {
         }
     }
 
-    private void onIzbaciViteza(TransferObjekatIgrac toi) {
+    private void onIzbaciViteza(TransferObjekatIgra toi) {
         System.out.println("Sistemska operacija je izbaci Viteza.");
         if (toi.prviPotez) {
             if (isPrviIgracNaPotezu(toi)) {
@@ -269,12 +269,12 @@ class Klijent extends Thread {
         toi.kliknutiVItezovi.clear();
     }
 
-    private void onPlati(TransferObjekatIgrac toi) {
+    private void onPlati(TransferObjekatIgra toi) {
         System.out.println("Sistemska operacija je plati.");
         izracunajSledecuFazu(toi);
     }
 
-    private void onOdigrajZlatnik(TransferObjekatIgrac toi) {
+    private void onOdigrajZlatnik(TransferObjekatIgra toi) {
         System.out.println("Sistemska operacija je odigrajZlatnik.");
         if (toi.fazaPoteza.equals(Faza.IZBACI_ZLATNIK)) {
             if (isPrviIgracNaPotezu(toi)) {
@@ -290,7 +290,7 @@ class Klijent extends Thread {
         }
     }
 
-    private void onDodeliKartu(TransferObjekatIgrac toi) {
+    private void onDodeliKartu(TransferObjekatIgra toi) {
         System.out.println("Sistemska operacija je dodeliKartu.");
         if (isPrviIgracNaPotezu(toi)) {
             dodeliKartuIzSpila(toi.spilPrvogIgraca, toi.rukaPrvogIgraca);
@@ -300,7 +300,7 @@ class Klijent extends Thread {
         izracunajSledecuFazu(toi);
     }
 
-    private void onKreirajIgraca(TransferObjekatIgrac toi) {
+    private void onKreirajIgraca(TransferObjekatIgra toi) {
         Igrac igrac = nadjiIgraca(toi).igr;
         if (igrac != null) {
             Igra.getInstance().dodajIgraca(igrac);
@@ -322,7 +322,7 @@ class Klijent extends Thread {
         }
     }
 
-    private void onNovaIgra(TransferObjekatIgrac toi) {
+    private void onNovaIgra(TransferObjekatIgra toi) {
         System.out.println("Sistemska operacija je novaIgra");
         Igra.reset();
         Igra.getInstance().dodajIgraca(toi.prviIgrac);
@@ -339,30 +339,30 @@ class Klijent extends Thread {
         } catch (IOException e) { /* failed */ }
     }
 
-    private void onInit(TransferObjekatIgrac toi, String s, String s2) {
+    private void onInit(TransferObjekatIgra toi, String s, String s2) {
         System.out.println(s);
         toi.igra = Igra.getInstance();
         toi.poruka = s2;
     }
 
-    public TransferObjekatIgrac nadjiIgraca(TransferObjekatIgrac toi) {
+    public TransferObjekatIgra nadjiIgraca(TransferObjekatIgra toi) {
         System.out.println("Usao u nadji igraca.");
         new NadjiIgraca().nadjiIgraca(toi);
         return toi;
     }
 
-    public TransferObjekatIgrac promeniIgraca(TransferObjekatIgrac toi) {
+    public TransferObjekatIgra promeniIgraca(TransferObjekatIgra toi) {
         // Uneti programski kod
         new PromeniIgraca().promeniIgraca(toi);
         return toi;
     }
 
-    public TransferObjekatIgrac kreirajIgru(TransferObjekatIgrac toi) {
+    public TransferObjekatIgra kreirajIgru(TransferObjekatIgra toi) {
         new KreirajIgru().kreirajIgru(toi);
         return toi;
     }
 
-    private void inicicijalizacijaToi(TransferObjekatIgrac toi) {
+    private void inicicijalizacijaToi(TransferObjekatIgra toi) {
         toi.igra = Igra.getInstance();
         toi.prviIgrac = Igra.getInstance().getIgraci().get(0);
         toi.spilPrvogIgraca = Igra.getInstance().getIgraci().get(0).vratiSpil();
@@ -397,7 +397,7 @@ class Klijent extends Thread {
         }
     }
 
-    private void izracunajSledecuFazu(TransferObjekatIgrac toi) {
+    private void izracunajSledecuFazu(TransferObjekatIgra toi) {
         System.out.println("IZRACUNAJ SLEDECU FAZU metoda -- trenutna toi faza poteza je " + toi.fazaPoteza.toString());
         switch (toi.fazaPoteza) {
             case DODELI_KARTU:
@@ -435,7 +435,7 @@ class Klijent extends Thread {
         }
     }
 
-    private void izracunajIshod (TransferObjekatIgrac toi) {
+    private void izracunajIshod (TransferObjekatIgra toi) {
         System.out.println("Sistemska operacija je izracunajIshod.");
         System.out.println("igrac na potezu : " + toi.igracNaPotezu.vratiKorisnickoIme());
         if (isPrviIgracNaPotezu(toi)) {
@@ -634,7 +634,7 @@ class Klijent extends Thread {
         }
     }
 
-    private void obavestiSve(TransferObjekatIgrac toi) throws IOException {
+    private void obavestiSve(TransferObjekatIgra toi) throws IOException {
         if (soketS.isClosed()) {
             return;
         }
