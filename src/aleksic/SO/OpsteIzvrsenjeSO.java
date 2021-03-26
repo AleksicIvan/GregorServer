@@ -8,7 +8,7 @@ import aleksic.DomenskiObjekat.GeneralDObject;
 
 /**
  *
- * @author Sinisa
+ * @author Ivan Aleksic
  */
 public abstract class OpsteIzvrsenjeSO {
     static public BrokerBazePodataka bbp = new BrokerBazePodataka1();

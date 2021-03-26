@@ -621,13 +621,20 @@ class Klijent extends Thread {
 
         if (toi.prviIgrac.getZivot() <= 0 || toi.drugiIgrac.getZivot() <= 0) {
             Igra.getInstance().setKrajIgre(true);
-            Igra.getInstance().setIdPobednika(
-                    toi.prviIgrac.getZivot() > 0
+                     toi.prviIgrac.getZivot() > 0
                         ? toi.prviIgrac.getId()
                             : toi.drugiIgrac.getId()
             );
             // TODO: Pozovi update Igre u bazi (update broj poteza i id pobednika)
             // TODO: Pozovi update Igraca u bazi (update za broj odigranih paritija i broj pobeda)
+            toi.poruka = "KRAJ IGRE";
+        } else if (toi.spilPrvogIgraca.size() == 0) {
+            Igra.getInstance().setKrajIgre(true);
+            Igra.getInstance().setIdPobednika(toi.drugiIgrac.getId());
+            toi.poruka = "KRAJ IGRE";
+        } else if (toi.spilDrugogIgraca.size() == 0) {
+            Igra.getInstance().setKrajIgre(true);
+            Igra.getInstance().setIdPobednika(toi.prviIgrac.getId());
             toi.poruka = "KRAJ IGRE";
         } else {
             izracunajSledecuFazu(toi);

@@ -6,7 +6,7 @@ import aleksic.TransferObjekat.TransferObjekatIgra;
 
 /**
  *
- * @author Sinisa
+ * @author Ivan Aleksic
  */
 public class PromeniIgraca extends OpsteIzvrsenjeSO {
     TransferObjekatIgra toi;
