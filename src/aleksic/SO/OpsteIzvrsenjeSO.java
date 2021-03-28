@@ -12,10 +12,8 @@ import aleksic.DomenskiObjekat.GeneralDObject;
  */
 public abstract class OpsteIzvrsenjeSO {
     static public BrokerBazePodataka bbp = new BrokerBazePodataka1();
-    int recordsNumber;
-    int currentRecord = -1;
     GeneralDObject gdo;
-    
+
     synchronized public boolean opsteIzvrsenjeSO() {
         bbp.makeConnection();
         boolean signal = izvrsiSO();

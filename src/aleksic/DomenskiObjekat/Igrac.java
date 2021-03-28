@@ -107,7 +107,7 @@ public class Igrac extends GeneralDObject implements Serializable {
 
     @Override
     public String getAtrValue() {
-        return null;
+        return "'" + korisnickoIme + "'" + ", " + "'" + korisnickaSifra + "'";
     }
 
     @Override
@@ -142,6 +142,6 @@ public class Igrac extends GeneralDObject implements Serializable {
 
     @Override
     public String getInsertAtributes() {
-        return null;
+        return "username, password";
     }
 }

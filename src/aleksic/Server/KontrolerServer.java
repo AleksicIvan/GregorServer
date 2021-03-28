@@ -5,9 +5,7 @@ import aleksic.BrokerBazePodataka.BrokerBazePodataka1;
 import aleksic.DomenskiObjekat.*;
 import aleksic.DomenskiObjekat.Faza;
 import aleksic.DomenskiObjekat.Igra;
-import aleksic.SO.KreirajIgru;
-import aleksic.SO.NadjiIgraca;
-import aleksic.SO.PromeniIgraca;
+import aleksic.SO.*;
 import aleksic.TransferObjekat.TransferObjekatIgra;
 
 import java.io.IOException;
@@ -68,7 +66,7 @@ class Klijent extends Thread {
             TransferObjekatIgra toi = null;
 
 
-            while (true) {
+            while (true && !soketS.isClosed()) {
                 toi = (TransferObjekatIgra) in.readObject();
 
                 if (toi.nazivOperacije.equals("odustanak")) {
@@ -81,6 +79,10 @@ class Klijent extends Thread {
 
                 if (toi.nazivOperacije.equals("init")) {
                     onInit(toi, "Sistemska operacija je init", "Igra je dodata do toi");
+                }
+
+                if (toi.nazivOperacije.equals("registracija")) {
+                    onRegistracija(toi);
                 }
 
                 if (toi.nazivOperacije.equals("kreirajIgraca")) {
@@ -137,14 +139,28 @@ class Klijent extends Thread {
         }
     }
 
+    private void onRegistracija(TransferObjekatIgra toi) {
+        registrujIgraca(toi);
+    }
+
     private void onPreskociFazu(TransferObjekatIgra toi) {
         System.out.println("Sistemska operacija je preskociFazu " + toi.fazaPoteza);
+        if (toi.fazaPoteza.equals(Faza.IZBACI_ZLATNIK)) {
+            if (toi.prviPotez) {
+                toi.igracNaPotezu = isPrviIgracNaPotezu(toi) ? toi.drugiIgrac : toi.prviIgrac;
+                System.out.println("PRVI JE POTEZ i preskocio sam fazu IZBACI_ZLATNIK; igrac na potezu je: " + toi.igracNaPotezu.vratiKorisnickoIme());
+                toi.fazaPoteza = Faza.DODELI_KARTU;
+                toi.prviPotez = false;
+                return;
+            }
+        }
         if (toi.fazaPoteza.equals(Faza.IZBACI_VITEZA)) {
             if (toi.prviPotez) {
                 toi.igracNaPotezu = isPrviIgracNaPotezu(toi) ? toi.drugiIgrac : toi.prviIgrac;
                 System.out.println("PRVI JE POTEZ i preskocio sam fazu IZBACI_VITEZA; igrac na potezu je: " + toi.igracNaPotezu.vratiKorisnickoIme());
                 toi.fazaPoteza = Faza.DODELI_KARTU;
                 toi.prviPotez = false;
+                return;
             }
         }
         if (toi.fazaPoteza.equals(Faza.NAPAD)) {
@@ -313,7 +329,6 @@ class Klijent extends Thread {
             if (Igra.getInstance().getIgraci().size() == 2) {
                 System.out.println("Sistemska operacija je kreirajIgraca - oba igraca su registrovana");
                 Igra.getInstance().init();
-                kreirajIgru(toi);
                 inicicijalizacijaToi(toi);
                 toi.poruka = "Sistem je pronasao protivnika. Obavestavam zadnjeg ulogovanog!";
             }
@@ -348,6 +363,12 @@ class Klijent extends Thread {
     public TransferObjekatIgra nadjiIgraca(TransferObjekatIgra toi) {
         System.out.println("Usao u nadji igraca.");
         new NadjiIgraca().nadjiIgraca(toi);
+        return toi;
+    }
+
+    public TransferObjekatIgra registrujIgraca(TransferObjekatIgra toi) {
+        System.out.println("Usao u registruj igraca.");
+        new RegistrujIgraca().registrujIgraca(toi);
         return toi;
     }
 
@@ -453,10 +474,6 @@ class Klijent extends Thread {
                         toi.redNapadDrugiIgrac.remove(i);
                         toi.redOdbranaDrugiIgrac.remove(i);
                     }
-//                    toi.redVitezovaPrviIgrac = new ArrayList<>(toi.redNapadPrviIgrac);
-//                    toi.redNapadPrviIgrac.clear();
-//                    toi.redRedVitezovaDrugiIgrac = new ArrayList<>(toi.redOdbranaDrugiIgrac);
-//                    toi.redOdbranaPrviIgrac.clear();
                     ArrayList<Karta> nk0 = new ArrayList<>();
                     nk0.addAll(toi.redVitezovaPrviIgrac);
                     nk0.addAll(new ArrayList<>(toi.redNapadPrviIgrac));
@@ -618,23 +635,28 @@ class Klijent extends Thread {
         toi.redOdbranaPrviIgrac.clear();
         toi.redNapadDrugiIgrac.clear();
         toi.redOdbranaDrugiIgrac.clear();
-
+        toi.igra = Igra.getInstance();
         if (toi.prviIgrac.getZivot() <= 0 || toi.drugiIgrac.getZivot() <= 0) {
             Igra.getInstance().setKrajIgre(true);
-                     toi.prviIgrac.getZivot() > 0
-                        ? toi.prviIgrac.getId()
-                            : toi.drugiIgrac.getId()
-            );
-            // TODO: Pozovi update Igre u bazi (update broj poteza i id pobednika)
+            Igra.getInstance().setIdPobednika(toi.prviIgrac.getZivot() > 0
+                 ? toi.prviIgrac.getId()
+                 : toi.drugiIgrac.getId());
+            Igra.getInstance().setBrojPoteza(toi.brojPoteza);
+            kreirajIgru(toi);
+            toi.poruka = "KRAJ IGRE";
             // TODO: Pozovi update Igraca u bazi (update za broj odigranih paritija i broj pobeda)
             toi.poruka = "KRAJ IGRE";
         } else if (toi.spilPrvogIgraca.size() == 0) {
             Igra.getInstance().setKrajIgre(true);
             Igra.getInstance().setIdPobednika(toi.drugiIgrac.getId());
+            Igra.getInstance().setBrojPoteza(toi.brojPoteza);
+            kreirajIgru(toi);
             toi.poruka = "KRAJ IGRE";
         } else if (toi.spilDrugogIgraca.size() == 0) {
             Igra.getInstance().setKrajIgre(true);
             Igra.getInstance().setIdPobednika(toi.prviIgrac.getId());
+            Igra.getInstance().setBrojPoteza(toi.brojPoteza);
+            kreirajIgru(toi);
             toi.poruka = "KRAJ IGRE";
         } else {
             izracunajSledecuFazu(toi);

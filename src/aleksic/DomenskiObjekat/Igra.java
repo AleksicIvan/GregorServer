@@ -26,7 +26,13 @@ public class Igra extends GeneralDObject implements Serializable {
         this.id = id;
     }
 
-    public static synchronized Igra     getInstance() {
+    public Igra(List<Igrac> igraci, Date datumIgre) {
+        this.igraci = igraci;
+        this.datumIgre = datumIgre;
+        init();
+    }
+
+    public static synchronized Igra getInstance() {
         if (instance == null) {
             instance = new Igra(new Date());
         }
@@ -37,10 +43,10 @@ public class Igra extends GeneralDObject implements Serializable {
         instance = null;
     }
 
-    public Igra(List<Igrac> igraci, Date datumIgre) {
-        this.igraci = igraci;
-        this.datumIgre = datumIgre;
-        init();
+
+
+    public void setBrojPoteza(int brojPoteza) {
+        this.brojPoteza = brojPoteza;
     }
 
     public List<Igrac> getIgraci() {
@@ -74,10 +80,6 @@ public class Igra extends GeneralDObject implements Serializable {
         idPobednika = id;
     }
 
-    public int getIdPobednika () {
-        return idPobednika;
-    }
-
     public Igrac odrediIgracaNaPrvomPotezu (Igrac igrac1, Igrac igrac2) {
         int dice = (int)(Math.random()*6+1);
         if (dice >= 3) {
@@ -91,39 +93,12 @@ public class Igra extends GeneralDObject implements Serializable {
         return igracNaPotezu;
     }
 
-    public Faza vratiFazuPoteza() {
-        return fazaPoteza;
-    }
-
     public void postaviFazuPoteza(Faza faza) {
         this.fazaPoteza = faza;
     }
 
     public void setIgracNaPotezu(Igrac igracNaPotezu) {
         this.igracNaPotezu = igracNaPotezu;
-    }
-
-    public Igrac getIgracNaPotezu() {
-        return igracNaPotezu;
-    }
-
-    public void odigrajPotezIzbaciZlatnik (Karta odigraniZlatnik) {
-        igracNaPotezu.vratiRuku().remove(odigraniZlatnik);
-        igracNaPotezu.vratiTalon().getRedZlatnika().add(odigraniZlatnik);
-    }
-
-    public void odigrajPotezIzbaciViteza (Karta odigraniVitez) {
-        igracNaPotezu.vratiRuku().remove(odigraniVitez);
-        igracNaPotezu.vratiTalon().getRedVitezova().add(odigraniVitez);
-    }
-
-    public void odigrajPotezNapadniVitezom (Karta odigraniVitez) {
-        igracNaPotezu.vratiTalon().getRedNapad().add(odigraniVitez);
-        igracNaPotezu.vratiTalon().getRedVitezova().remove(odigraniVitez);
-    }
-
-    public boolean isKrajIgre() {
-        return krajIgre;
     }
 
     public void setKrajIgre(boolean krajIgre) {
@@ -137,7 +112,7 @@ public class Igra extends GeneralDObject implements Serializable {
 
     @Override
     public String setAtrValue() {
-        return null;
+        return "brojPoteza = '" +  brojPoteza + "', pobednik = '" + idPobednika + "'";
     }
 
     @Override
