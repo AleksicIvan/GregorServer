@@ -26,7 +26,6 @@ public class KontrolerServer {
         ss = new ServerSocket(9001);
         int iKlijent = 0;
         while (true) {
-            // programski kod!!!
             Socket soketS = ss.accept();
             kl = new Klijent(soketS, ++iKlijent);
             lkl.add(kl);
@@ -70,7 +69,7 @@ class Klijent extends Thread {
                 toi = (TransferObjekatIgra) in.readObject();
 
                 if (toi.nazivOperacije.equals("odustanak")) {
-                    onOdustanak();
+                    onOdustanak(toi);
                 }
 
                 if (toi.nazivOperacije.equals("novaIgra")) {
@@ -125,6 +124,9 @@ class Klijent extends Thread {
                     if (soketS.isClosed()) return;
                     out.writeObject(toi);
                 } else {
+                    if (toi.nazivOperacije.equals("odustanak")) {
+                        return;
+                    }
                     obavestiSve(toi);
                 }
             }
@@ -333,7 +335,7 @@ class Klijent extends Thread {
                 toi.poruka = "Sistem je pronasao protivnika. Obavestavam zadnjeg ulogovanog!";
             }
         } else {
-            toi.poruka = "Greska! Igrac sa unesenim vrednostima ne postoji. Probajte ponovo";
+            toi.poruka = "Greska! Igrac sa unetim vrednostima ne postoji. Probajte ponovo";
         }
     }
 
@@ -347,11 +349,10 @@ class Klijent extends Thread {
         toi.poruka = "Nova igra je dodata do toi";
     }
 
-    private void onOdustanak() {
-        try {
-            soketS.close();
-            System.out.println("The server is shut down!");
-        } catch (IOException e) { /* failed */ }
+    private void onOdustanak(TransferObjekatIgra toi) {
+        Igra.reset();
+        onInit(toi, "Sistemska operacija je init", "Igra je dodata do toi");
+        System.out.println("The server is shut down!");
     }
 
     private void onInit(TransferObjekatIgra toi, String s, String s2) {
@@ -638,26 +639,26 @@ class Klijent extends Thread {
         toi.igra = Igra.getInstance();
         if (toi.prviIgrac.getZivot() <= 0 || toi.drugiIgrac.getZivot() <= 0) {
             Igra.getInstance().setKrajIgre(true);
-            Igra.getInstance().setIdPobednika(toi.prviIgrac.getZivot() > 0
-                 ? toi.prviIgrac.getId()
-                 : toi.drugiIgrac.getId());
+            Igrac pobednik = toi.prviIgrac.getZivot() > 0
+                    ? toi.prviIgrac
+                    : toi.drugiIgrac;
+            Igra.getInstance().setIdPobednika(pobednik.getId());
             Igra.getInstance().setBrojPoteza(toi.brojPoteza);
             kreirajIgru(toi);
-            toi.poruka = "KRAJ IGRE";
+            toi.poruka = "Kraj igre. Pobednik je " + pobednik.vratiKorisnickoIme() + "! Da li zelite novu igru?";
             // TODO: Pozovi update Igraca u bazi (update za broj odigranih paritija i broj pobeda)
-            toi.poruka = "KRAJ IGRE";
         } else if (toi.spilPrvogIgraca.size() == 0) {
             Igra.getInstance().setKrajIgre(true);
             Igra.getInstance().setIdPobednika(toi.drugiIgrac.getId());
             Igra.getInstance().setBrojPoteza(toi.brojPoteza);
             kreirajIgru(toi);
-            toi.poruka = "KRAJ IGRE";
+            toi.poruka = "Kraj igre. Pobednik je " + toi.drugiIgrac.vratiKorisnickoIme() + "! Da li zelite novu igru?";
         } else if (toi.spilDrugogIgraca.size() == 0) {
             Igra.getInstance().setKrajIgre(true);
             Igra.getInstance().setIdPobednika(toi.prviIgrac.getId());
             Igra.getInstance().setBrojPoteza(toi.brojPoteza);
             kreirajIgru(toi);
-            toi.poruka = "KRAJ IGRE";
+            toi.poruka = "Kraj igre. Pobednik je " + toi.prviIgrac.vratiKorisnickoIme() + "! Da li zelite novu igru?";
         } else {
             izracunajSledecuFazu(toi);
         }

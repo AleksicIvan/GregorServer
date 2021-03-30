@@ -21,9 +21,8 @@ import java.util.List;
 
 
 public class BrokerBazePodataka1 extends BrokerBazePodataka {
-    Connection conn = null;
+    private Connection conn = null;
 
-    // Promenljivo!!!
     @Override
     public boolean makeConnection() {
         String Url;
@@ -31,7 +30,7 @@ public class BrokerBazePodataka1 extends BrokerBazePodataka {
             Class.forName("com.mysql.cj.jdbc.Driver");
             Url = "jdbc:mysql://127.0.0.1:3306/gregor_mtg";
             conn = DriverManager.getConnection(Url, "root", "toor");
-            conn.setAutoCommit(false); // Ako se ovo ne uradi nece moci da se radi roolback.
+            conn.setAutoCommit(false);
         } catch (SQLException | ClassNotFoundException ex) {
             Logger.getLogger(BrokerBazePodataka1.class.getName()).log(Level.SEVERE, null, ex);
             return false;
